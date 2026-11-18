@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="设置">
+  <defs>
+    <!-- 三段明度：左上高光 → 主体金 → 右下暗部（对齐 art-direction-brief 的光照契约） -->
+    <radialGradient id="gearBody" cx="36%" cy="28%" r="78%">
+      <stop offset="0" stop-color="#fff6cf"/>
+      <stop offset="0.5" stop-color="#ffd166"/>
+      <stop offset="1" stop-color="#e89a2c"/>
+    </radialGradient>
+    <linearGradient id="gearStar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eaf6ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 8 枚圆润齿轮：先画齿，主体圆随后覆盖齿根，形成一体的齿轮剪影 -->
+  <g fill="url(#gearBody)" stroke="#070a16" stroke-width="2.6" stroke-linejoin="round">
+    <rect x="27.5" y="3.5" width="9" height="12" rx="3.2" transform="rotate(0 32 32)"/>
+    <rect x="27.5" y="3.5" width="9" height="12" rx="3.2" transform="rotate(45 32 32)"/>
+    <rect x="27.5" y="3.5" width="9" height="12" rx="3.2" transform="rotate(90 32 32)"/>
+    <rect x="27.5" y="3.5" width="9" height="12" rx="3.2" transform="rotate(135 32 32)"/>
+    <rect x="27.5" y="3.5" width="9" height="12" rx="3.2" transform="rotate(180 32 32)"/>
+    <rect x="27.5" y="3.5" width="9" height="12" rx="3.2" transform="rotate(225 32 32)"/>
+    <rect x="27.5" y="3.5" width="9" height="12" rx="3.2" transform="rotate(270 32 32)"/>
+    <rect x="27.5" y="3.5" width="9" height="12" rx="3.2" transform="rotate(315 32 32)"/>
+    <circle cx="32" cy="32" r="20"/>
+  </g>
+
+  <!-- 内圈浅色台阶，增加 Q 版层次 -->
+  <circle cx="32" cy="32" r="13.2" fill="#fff4cf" stroke="#f0b64a" stroke-width="1.8"/>
+
+  <!-- 中心星光（呼应「星光保卫战」主题） -->
+  <g transform="translate(32 32)" fill="url(#gearStar)" stroke="#070a16" stroke-width="1.7" stroke-linejoin="round">
+    <polygon points="0,-8.5 2.23,-3.07 8.08,-2.63 3.61,1.17 5,6.88 0,3.8 -5,6.88 -3.61,1.17 -8.08,-2.63 -2.23,-3.07"/>
+  </g>
+
+  <!-- 左上柔光高光弧 -->
+  <path d="M18.5 24 A15 15 0 0 1 29 17.5" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.62"/>
+</svg>

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#bdeaff">
+<title>星光保卫战 · Starlight Sweets</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- 左上角全局设置入口：Q 版齿轮，点击弹出设置浮窗（音效/震屏/闪光） -->
+<button id="settingsBtn" class="icon-btn" type="button" aria-label="打开设置" aria-haspopup="dialog" aria-controls="settingsPanel" aria-expanded="false">
+  <img src="assets/settings-gear.svg" alt="" draggable="false">
+</button>
+
+<div id="settingsOverlay" class="settings-overlay hidden">
+  <div class="settings-backdrop" id="settingsBackdrop"></div>
+  <section id="settingsPanel" class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="settings-head">
+      <img class="settings-head-gear" src="assets/settings-gear.svg" alt="" draggable="false">
+      <h2 id="settingsTitle">设置</h2>
+      <button id="settingsClose" class="settings-close" type="button" aria-label="关闭设置">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+      </button>
+    </div>
+    <div class="settings-body">
+      <div class="setting-row">
+        <span class="setting-icon music" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 17V5.6l10-2.2V15"/><circle class="note" cx="5.4" cy="17.4" r="2.8"/><circle class="note" cx="15.4" cy="15" r="2.8"/></svg>
+        </span>
+        <span class="setting-text"><b>音乐</b><small>可爱的背景循环曲</small></span>
+        <button id="musicBtn" class="switch on" type="button" role="switch" aria-checked="true" aria-label="音乐开关"><i></i></button>
+      </div>
+      <div class="setting-row">
+        <span class="setting-icon sound" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.6l4.4 3.7V5.8L7.6 9.5H4z"/><path class="wave" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.6a7.6 7.6 0 0 1 0 10.8"/></svg>
+        </span>
+        <span class="setting-text"><b>音效</b><small>攻击、拾取与升级声音</small></span>
+        <button id="soundBtn" class="switch on" type="button" role="switch" aria-checked="true" aria-label="音效开关"><i></i></button>
+      </div>
+      <div class="setting-row">
+        <span class="setting-icon shake" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="8.5" y="4.5" width="7" height="15" rx="2"/><path class="wave" d="M4 9l-1.5 3L4 15M20 9l1.5 3L20 15"/></svg>
+        </span>
+        <span class="setting-text"><b>震屏</b><small>命中与受击的镜头反馈</small></span>
+        <div id="shakeGroup" class="seg" role="group" aria-label="震屏强度">
+          <button type="button" data-val="1">标准</button><button type="button" data-val="0.5">减弱</button><button type="button" data-val="0">关闭</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-icon flash" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3.2l2.1 5.2 5.6.4-4.3 3.6 1.3 5.5L12 15.2l-4.7 2.7 1.3-5.5L4.3 8.8l5.6-.4L12 3.2z"/></svg>
+        </span>
+        <span class="setting-text"><b>闪光</b><small>技能与升级的亮光效果</small></span>
+        <div id="flashGroup" class="seg" role="group" aria-label="闪光强度">
+          <button type="button" data-val="1">标准</button><button type="button" data-val="0.5">减弱</button><button type="button" data-val="0">关闭</button>
+        </div>
+      </div>
+    </div>
+    <p class="settings-note">设置会自动保存，下次打开依然生效</p>
+  </section>
+</div>
+
+<div id="hud">
+  <div class="hud-top">
+    <div class="hud-player">
+      <div class="hud-avatar" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3.2c1 2.6 2.2 3.8 4.8 4.8-2.6 1-3.8 2.2-4.8 4.8-1-2.6-2.2-3.8-4.8-4.8 2.6-1 3.8-2.2 4.8-4.8z"/><circle cx="17.2" cy="15.6" r="1.7"/><circle cx="7" cy="16.8" r="1.1"/></svg>
+        <span class="hud-lv"><small>LV</small><b id="hLevel">1</b></span>
+      </div>
+      <div class="hud-bars">
+        <div class="hbar hp" id="hpBar">
+          <span class="hbar-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 20.6C6.4 16.4 3.2 12.9 3.2 9.3 3.2 6.4 5.4 4.4 8 4.4c1.7 0 3.1.8 4 2.1.9-1.3 2.3-2.1 4-2.1 2.6 0 4.8 2 4.8 4.9 0 3.6-3.2 7.1-8.8 11.3z"/><ellipse class="shine" cx="8.4" cy="8.6" rx="1.7" ry="1.1" transform="rotate(-24 8.4 8.6)"/></svg>
+          </span>
+          <div class="hbar-track"><i id="hpFill"></i><span class="hbar-text" id="hpText">100 / 100</span></div>
+        </div>
+        <div class="hbar xp">
+          <span class="hbar-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2.8l2.6 5.5 6 .8-4.4 4.2 1.1 5.9L12 16.4l-5.3 2.8 1.1-5.9L3.4 9.1l6-.8L12 2.8z"/><ellipse class="shine" cx="9.3" cy="8.2" rx="1.5" ry="0.9" transform="rotate(-30 9.3 8.2)"/></svg>
+          </span>
+          <div class="hbar-track"><i id="xpFill"></i><span class="hbar-text dim">经验</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="hud-stat" aria-label="本关用时">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.6" r="8.2"/><path d="M12 8v4.9l3.4 2.1"/><path d="M9 2.6h6" /></svg>
+        <b id="hTime">00:00</b>
+      </div>
+      <div class="hud-stat" aria-label="击退数量">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4c4.4 0 7.6 3 7.6 7.2 0 2.5-1.1 4.3-2.9 5.4l-.4 3.2c-.1.8-.8 1.4-1.6 1.4h-5.4c-.8 0-1.5-.6-1.6-1.4l-.4-3.2c-1.8-1.1-2.9-2.9-2.9-5.4 0-4.2 3.2-7.2 7.6-7.2z"/><circle class="hole" cx="9.2" cy="11" r="1.7"/><circle class="hole" cx="14.8" cy="11" r="1.7"/><path class="hole" d="M11 15.4h2l-1 1.6z"/></svg>
+        <b id="hKills">0</b>
+      </div>
+      <button id="pauseBtn" class="hud-pause" type="button" aria-label="暂停并退出游戏" title="暂停 / 退出（Esc）">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.2" y="4.6" width="4.4" height="14.8" rx="2"/><rect x="13.4" y="4.6" width="4.4" height="14.8" rx="2"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="hud-goal">
+    <span class="hud-act" id="hActName">🌼 阳光草地</span>
+    <div class="hbar-track goal"><i id="goalFill"></i><span class="hbar-text" id="hGoal">目标</span></div>
+  </div>
+  <div id="wpanel"></div>
+</div>
+
+<div id="bossbar">
+  <div class="name" id="bossName">🌟 草莓大福·莓莓</div>
+  <div class="bar boss"><i id="bossFill"></i></div>
+</div>
+
+<div id="menu" class="screen home-screen">
+  <div class="home-world" aria-hidden="true">
+    <div class="sun-glow"></div>
+    <div class="cloud cloud-a"><i></i><i></i><i></i></div>
+    <div class="cloud cloud-b"><i></i><i></i><i></i></div>
+    <div class="cloud cloud-c"><i></i><i></i><i></i></div>
+    <div class="home-stars">
+      <i style="--x:8%;--y:20%;--d:0s;--s:1"></i><i style="--x:22%;--y:10%;--d:.7s;--s:.7"></i>
+      <i style="--x:42%;--y:18%;--d:1.4s;--s:.85"></i><i style="--x:57%;--y:8%;--d:.3s;--s:1.1"></i>
+      <i style="--x:78%;--y:16%;--d:1s;--s:.8"></i><i style="--x:91%;--y:32%;--d:1.8s;--s:1"></i>
+      <i style="--x:12%;--y:57%;--d:1.2s;--s:.75"></i><i style="--x:48%;--y:62%;--d:.5s;--s:.65"></i>
+    </div>
+    <div class="hill hill-back"></div>
+    <div class="hill hill-front"></div>
+    <div class="flower-field"><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+
+  <main class="home-shell">
+    <section class="home-copy" aria-labelledby="gameTitle">
+      <div class="eyebrow"><i></i> STARLIGHT GUARD <i></i></div>
+      <div class="title-wrap">
+        <span class="title-spark" aria-hidden="true">✦</span>
+        <h1 id="gameTitle"><span class="title-pink">星光</span><span class="title-blue">保卫战</span></h1>
+        <span class="title-ribbon">和伙伴一起，守护闪闪发光的世界</span>
+      </div>
+      <p class="home-tagline">收集星星，结识甜点伙伴<br>开启一场软乎乎的魔法冒险</p>
+      <button class="btn home-play" id="startBtn" aria-label="开始冒险，选择关卡">
+        <span class="play-star" aria-hidden="true"><img src="assets/starlight-shard.svg" alt=""></span>
+        <span class="play-copy"><strong>开始冒险</strong><small>星光之旅等着你</small></span>
+        <span class="play-arrow" aria-hidden="true">›</span>
+      </button>
+      <div class="save-summary"><i></i><span id="menuProgress">冒险进度 · 已解锁 1 / 20 关</span></div>
+      <div class="feature-row" aria-label="游戏特色">
+        <span><i class="feature-dot move-dot"></i>自由移动</span>
+        <span><i class="feature-dot auto-dot"></i>自动攻击</span>
+        <span><i class="feature-dot card-dot"></i>升级三选一</span>
+      </div>
+    </section>
+
+    <section class="hero-area" aria-label="主角和星灵伙伴">
+      <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="speech-bubble"><span>今天也要</span><strong>闪闪发光！</strong></div>
+      <div class="hero-character"><canvas class="rig-canvas" data-kind="player" data-pose="cheer" aria-label="星光小法师"></canvas></div>
+      <div class="companion companion-left">
+        <canvas class="rig-canvas" data-kind="spore" data-pose="idle" aria-label="伙伴棉棉"></canvas><span>棉棉</span>
+      </div>
+      <div class="companion companion-right">
+        <canvas class="rig-canvas" data-kind="split" data-pose="idle" aria-label="伙伴团子"></canvas><span>团子</span>
+      </div>
+      <div class="hero-platform" aria-hidden="true"><i></i></div>
+      <img class="orbit-spark spark-one" src="assets/starlight-shard.svg" alt="">
+      <img class="orbit-spark spark-two" src="assets/starlight-shard.svg" alt="">
+      <img class="orbit-spark spark-three" src="assets/starlight-shard.svg" alt="">
+    </section>
+  </main>
+
+  <div class="home-bottom">
+    <div class="control-tip"><span>拖动屏幕移动</span><i></i><span>电脑 WASD / 方向键</span></div>
+    <div class="control-tip tip-settings"><span>左上角 ⚙ 可调整音效与动效</span></div>
+  </div>
+</div>
+
+<div id="sceneTransition" class="hidden" aria-hidden="true">
+  <div class="transition-burst"></div><img class="transition-star" src="assets/starlight-shard.svg" alt="">
+  <span>星光出发</span>
+</div>
+
+<div id="levels" class="screen hidden">
+  <h2>🗺️ 选择关卡</h2>
+  <div class="sub" id="levelSub">已解锁至第 1 关</div>
+  <div id="levelGrid"></div>
+  <button class="btn ghost" id="backMenuBtn">返回首页</button>
+</div>
+
+<div id="levelup" class="screen hidden">
+  <h2 id="upTitle">✨ 升级！选择强化</h2>
+  <div class="hint" id="upHint">点击卡牌选择</div>
+  <div id="cards"></div>
+</div>
+
+<div id="result" class="screen hidden">
+  <h2 id="resTitle">✨ 通过！</h2>
+  <div class="sub" id="resSub">继续下一关吧</div>
+  <div class="stats">
+    <div>用时 <b id="rTime">00:00</b></div>
+    <div>达到等级 <b id="rLevel">1</b></div>
+    <div>击退数 <b id="rKills">0</b></div>
+    <div>拾取星星 <b id="rXp">0</b></div>
+  </div>
+  <div class="result-btns">
+    <button class="btn" id="nextBtn">下一关 ➜</button>
+    <button class="btn ghost" id="againBtn">重试本关</button>
+  </div>
+  <button class="btn ghost small" id="resultLevelsBtn">选择关卡</button>
+</div>
+
+<!-- 游戏内暂停 / 退出浮窗 -->
+<div id="pauseOverlay" class="settings-overlay hidden">
+  <div class="settings-backdrop" id="pauseBackdrop"></div>
+  <section id="pausePanel" class="settings-panel pause-panel" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="settings-head">
+      <span class="settings-head-gear" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.6"/><rect x="13.5" y="5" width="4" height="14" rx="1.6"/></svg>
+      </span>
+      <h2 id="pauseTitle">休息一下</h2>
+    </div>
+    <p class="pause-sub">星光之旅先暂停，随时可以继续</p>
+    <div class="pause-actions">
+      <button class="btn pause-continue" id="pauseContinue" type="button">▶ 继续游戏</button>
+      <button class="btn ghost" id="pauseRestart" type="button">重试本关</button>
+      <button class="btn ghost" id="pauseQuit" type="button">退出到选关</button>
+    </div>
+  </section>
+</div>
+
+<div id="toast"></div>
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/music.js"></script>
+<script src="js/rig.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/slicerig.js"></script>
+<script src="js/logic.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

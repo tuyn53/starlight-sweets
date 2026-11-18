@@ -1,0 +1,339 @@
+{
+  "schema_version": 1,
+  "art_direction_brief": "docs/art-direction-brief.md",
+  "assets": [
+    {
+      "id": "player-idle",
+      "role": "player base pose",
+      "path": "assets/characters/player.png",
+      "status": "shipped",
+      "runtime_height_px": 30,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:59:39",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "待老大确认（2026-11-18 无帽双马尾新版）"
+      }
+    },
+    {
+      "id": "enemy-spore",
+      "role": "苔姬 · normal enemy (poison cloud)",
+      "path": "assets/characters/spore.png",
+      "status": "shipped",
+      "runtime_height_px": 44,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:47:57",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    },
+    {
+      "id": "enemy-swift",
+      "role": "夜燕 · fast enemy",
+      "path": "assets/characters/swift.png",
+      "status": "shipped",
+      "runtime_height_px": 44,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:47:57",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    },
+    {
+      "id": "enemy-split",
+      "role": "绯樱 · splitting enemy",
+      "path": "assets/characters/split.png",
+      "status": "shipped",
+      "runtime_height_px": 44,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:47:57",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    },
+    {
+      "id": "enemy-mimic",
+      "role": "蜃影 · stealth enemy",
+      "path": "assets/characters/mimic.png",
+      "status": "shipped",
+      "runtime_height_px": 44,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:47:57",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    },
+    {
+      "id": "enemy-thief",
+      "role": "金狐 · experience-stealing enemy",
+      "path": "assets/characters/thief.png",
+      "status": "shipped",
+      "runtime_height_px": 44,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:47:57",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    },
+    {
+      "id": "enemy-bomber",
+      "role": "花火 · self-detonating enemy",
+      "path": "assets/characters/bomber.png",
+      "status": "shipped",
+      "runtime_height_px": 44,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:47:57",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    },
+    {
+      "id": "enemy-elite",
+      "role": "蜂姬 · summoner elite",
+      "path": "assets/characters/elite.png",
+      "status": "shipped",
+      "runtime_height_px": 52,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:47:57",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    },
+    {
+      "id": "enemy-boss",
+      "role": "夜魇 · three-phase boss",
+      "path": "assets/characters/boss.png",
+      "status": "shipped",
+      "runtime_height_px": 104,
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "visual_locks": [
+        "palette",
+        "silhouette",
+        "proportions",
+        "facing",
+        "light-direction",
+        "outline-width"
+      ],
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "creator": "ImageGen (workbuddy)",
+        "created_at": "2026-11-18T15:47:57",
+        "license": "AI-generated, project use",
+        "attribution": "",
+        "prompt_or_source_record": "docs/art-direction-brief.md"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    }
+  ]
+}
