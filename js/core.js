@@ -26,7 +26,7 @@ let uid = 1;
 // === Juice / game-feel：trauma 震屏 + 分级反馈 + hit-stop ===
 // trauma 叠加、线性衰减，实际震动 = trauma²，用叠加正弦采样而非逐帧随机（避免静电式抖动）
 const Juice = {
-  trauma:0, stop:0, stopId:0, clock:0,
+  trauma:0, stop:0, clock:0,
   shakeScale:1, flashScale:1,   // 可访问性开关（0~1）
   _last:{},                     // 同类事件节流时间戳：key -> clock
   init(){
@@ -58,13 +58,7 @@ const Juice = {
     if(cap<1 && next>cap) next=Math.max(this.trauma,cap);
     this.trauma=clamp(next,0,1);
   },
-  // 只有最新的一次 hit-stop 负责恢复，避免重叠时提前解冻
-  hitStop(dur){
-    if(dur<=0) return;
-    const id=++this.stopId;
-    this.stop=Math.max(this.stop,dur);
-    setTimeout(()=>{ if(id===this.stopId) this.stop=0; }, dur*1000);
-  },
+  hitStop(dur){ this.stop=Math.max(this.stop,dur); },
   // 低频重大事件的完整反馈（震屏 + 停顿 + 闪光）；x/y/color 预留给后续粒子钩子
   feedback(tier, x, y, color, cap=1, key=null, gap=0){
     if(!this.ready(key,gap)) return; // 节流时整组通道一起跳过
@@ -76,6 +70,7 @@ const Juice = {
   // 用真实时间衰减，hit-stop/暂停时也不会把镜头卡在偏心位置
   tick(realDt){
     this.clock+=realDt;
+    this.stop=Math.max(0,this.stop-realDt);
     this.trauma=Math.max(0, this.trauma-CFG.FEEL.traumaDecay*realDt);
   },
   // 两个不同频率正弦叠加的噪声，返回 [-1,1]
@@ -130,6 +125,8 @@ const Sound = (() => {
     },
     shoot(){ tone(740,.07,'sine',.026,1100); },
     hit(){ tone(420,.05,'triangle',.018,300); },
+    meteor(){ tone(720,.17,'triangle',.038,190); tone(185,.10,'sine',.03,75); },
+    nova(){ tone(392,.19,'sine',.046,784); tone(587,.24,'triangle',.021,1174); },
     kill(){ tone(660,.09,'sine',.03,990); },
     pickup(){ tone(1047,.06,'sine',.035,1568); },
     levelup(){ [659,784,988,1319].forEach((f,i)=>setTimeout(()=>tone(f,.16,'sine',.05),i*85)); },
@@ -146,11 +143,14 @@ const Sound = (() => {
 const Input = {
   keys:new Set(), joy:{active:false,id:null,ox:0,oy:0,dx:0,dy:0,r:56,x:0,y:0},
   init(){
+    for(const type of ['selectstart','contextmenu','dragstart']){
+      document.addEventListener(type,e=>e.preventDefault());
+    }
     addEventListener('keydown',e=>{
-      if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+      if(game.state==='playing' && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
       this.keys.add(e.code); Sound.unlock();
       // 卡牌键盘选择
-      if (game.state==='levelup' && ['Digit1','Digit2','Digit3'].includes(e.code)) {
+      if (game.state==='levelup' && !e.repeat && !isSettingsOpen() && ['Digit1','Digit2','Digit3'].includes(e.code)) {
         const i=+e.code.slice(-1)-1; if (game.cards[i]) chooseCard(i);
       }
     });
@@ -158,7 +158,7 @@ const Input = {
     addEventListener('blur',()=>this.keys.clear());
     cvs.addEventListener('pointerdown',e=>{
       Sound.unlock();
-      if (game.state!=='playing' || this.joy.active) return;
+      if (game.state!=='playing' || this.joy.active || e.button!==0) return;
       const j=this.joy; j.active=true; j.id=e.pointerId; j.ox=e.clientX; j.oy=e.clientY;
       j.x=e.clientX; j.y=e.clientY; j.dx=0; j.dy=0;
       try{cvs.setPointerCapture(e.pointerId);}catch(_){}
@@ -168,10 +168,11 @@ const Input = {
       let dx=e.clientX-j.ox, dy=e.clientY-j.oy, len=Math.hypot(dx,dy)||1;
       const d=Math.min(len,j.r), nx=dx/len, ny=dy/len;
       j.x=j.ox+nx*d; j.y=j.oy+ny*d;
-      const dead=len<12; j.dx=dead?0:clamp(dx/j.r,-1,1); j.dy=dead?0:clamp(dy/j.r,-1,1);
+      const strength=clamp((len-7)/(j.r-7),0,1); j.dx=nx*strength; j.dy=ny*strength;
     });
     const up=e=>{const j=this.joy; if(e.pointerId===j.id){j.active=false;j.id=null;j.dx=0;j.dy=0;}};
     cvs.addEventListener('pointerup',up); cvs.addEventListener('pointercancel',up);
+    cvs.addEventListener('lostpointercapture',up);
   },
   vector(){
     const k=this.keys;
@@ -179,7 +180,7 @@ const Input = {
     let y=(k.has('KeyS')||k.has('ArrowDown')?1:0)-(k.has('KeyW')||k.has('ArrowUp')?1:0);
     if(x||y){const l=Math.hypot(x,y);return {x:x/l,y:y/l};}
     const j=this.joy; if(j.active&&(j.dx||j.dy)){
-      const l=Math.hypot(j.dx,j.dy); return {x:j.dx/l,y:j.dy/l};
+      return {x:j.dx,y:j.dy};
     }
     return {x:0,y:0};
   }

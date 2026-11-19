@@ -34,15 +34,15 @@ function startLevel(n){
   const theme=isBossLevel(n);
   Object.assign(game,{
     state:'playing', level:n, levelTime:0, levelKills:0,
-    time:0, kills:0, totalXp:0, spawnT:0.8, eliteT:45, propT:6, lastAnnounce:null,
-    sporeMutated:false, bossSpawned:false, bossIntro:false, boss:null,
+    time:0, kills:0, totalXp:0, spawnT:0.8, eliteT:45, propT:6, lastWave:1,
+    sporeMutated:false, bossSpawned:false, bossIntro:false, boss:null, bossEntry:null,
     bossKind:theme?bossInfo(n):guardInfo(n), bossGuard:!theme,
-    cards:[], pendingLevels:0, chestQueue:0,
+    cards:[], pendingLevels:0, chestQueue:0, firstUpgradeShown:false,
     enemies:[], bullets:[], ebullets:[], gems:[], chests:[], props:[], parts:[], dmgTexts:[], fx:[], hazards:[],
     shake:0, flash:0,
   });
   game.cam.x=-VIEW.w/2; game.cam.y=-VIEW.h/2;
-  Juice.trauma=0; Juice.stop=0; Juice.stopId++; Juice._last={};
+  Juice.trauma=0; Juice.stop=0; Juice._last={};
   Juice.clock=0;
   player=makePlayer();
   aimLock.ref=null; aimLock.until=0; game.aimTarget=null;   // 每关重置目标锁定
@@ -59,12 +59,15 @@ function startLevel(n){
 
 // === 刷怪 & 掉落 ===
 function spawnEnemy(type, x, y){
-  if (game.enemies.length >= CFG.MAX_ENEMIES) return;
+  if (game.enemies.length >= CFG.MAX_ENEMIES) return null;
   const t = ETYPE[type], L=CFG.LEVEL;
-  // 敌人成长：关卡号主导、时间微弱，等级只轻度联动（旧公式 time×0.011 在 10 分钟时 +6.6 倍会压死构筑）
-  const scale = 1 + (game.level-1)*L.diffStep + game.levelTime*L.diffTime + (player.level-1)*L.diffLv;
+  // 起手武器相同，首轮普通怪保持相同血量，关卡差异从第一张卡后逐步拉开。
+  const buildProgress=clamp((player.level-1)/9,0,1);
+  const scale=1+(game.level-1)*L.diffStep*buildProgress+(player.level-1)*L.diffLv;
   const ang = Math.random()*TAU;
-  const rad = Math.max(VIEW.w,VIEW.h)*0.62 + rand(30,140);
+  const border=Math.min(VIEW.w*.5/Math.max(.001,Math.abs(Math.cos(ang))),
+                          VIEW.h*.5/Math.max(.001,Math.abs(Math.sin(ang))));
+  const rad=border+rand(35,100);
   const px = x!==undefined ? x : player.x+Math.cos(ang)*rad;
   const py = y!==undefined ? y : player.y+Math.sin(ang)*rad;
   let hp=t.hp*scale;
@@ -73,7 +76,7 @@ function spawnEnemy(type, x, y){
     ? L.guardHpBase+game.level*L.guardHpStep
     : L.bossHpBase+game.level*L.bossHpStep;
   const color=type==='boss'&&game.bossKind?game.bossKind.color:t.color;
-  game.enemies.push({
+  const enemy={
     id:uid++, type, x:px, y:py, ox:px, oy:py, r:t.r,
     hp, maxHp:hp, speed:t.speed*rand(.9,1.1), dmg:t.dmg, xp:t.xp,
     color, pal:t.pal, mech:t.mech, tier:t.tier||0,
@@ -84,25 +87,27 @@ function spawnEnemy(type, x, y){
     stealT:rand(4,8), carrying:0, phaseStage:1, zig:rand(0,TAU),
     isChild:false,
     toxic:!(type==='spore' && game.time<CFG.SPORE.safeTime),
-  });
+  };
+  game.enemies.push(enemy);
+  return enemy;
 }
 // 关内波次：本关可用怪池按关内时间逐波释放（阵容表给"可用池"，波次给"登场节奏"）
 // 与旧的"全体从开局混编"相比：L1 只有 3 种怪打一整局，靠波次维持变化。
-const WAVE_TIME=[0, 45, 150, 300]; // 第 1/2/3/4 波起始秒数（对应 10 分钟模板）
+const WAVE_TIME=[0, 12, 31, 56, 82, 115];
 function pickEnemyType(){
   const S=CFG.SPORE, t=game.levelTime;
   if(t>=S.safeTime && !game.sporeMutated){
     game.sporeMutated=true; toast('✨ 棉棉长大了：倒下会留下糖霜云！');
   }
   const roster=levelRoster(game.level).pool;
-  // 波次只放开"本关池"的前若干种：第 1 波前 2 种，之后每波 +1，最多到本关池上限
+  // 先让第一种敌人独立登场，然后逐波放开怪池。
   let wave=1;
   for(let i=1;i<WAVE_TIME.length;i++) if(t>=WAVE_TIME[i]) wave=i+1;
-  const open=Math.min(roster.length, Math.max(2, wave+1));
+  const open=Math.min(roster.length, wave);
   const active=roster.slice(0,open);
   const type=active[randInt(0,active.length-1)];
-  if(type!==game.lastAnnounce && active.indexOf(type)===open-1 && open>2){
-    game.lastAnnounce=type; toast('✨ 新伙伴登场：'+ETYPE[type].name);
+  if(open>game.lastWave && active.indexOf(type)===open-1){
+    game.lastWave=open; toast('新伙伴登场 · '+ETYPE[type].name);
   }
   return type;
 }
@@ -182,7 +187,11 @@ function buildCards(chest){
     if (lv<PASSIVES[k].max) pool.push({kind:'passive',id:k,rare:false});
   }
   shuffle(pool);
-  let picks=pool.slice(0,3);
+  const firstUpgrade=!chest && !game.firstUpgradeShown;
+  if(firstUpgrade) game.firstUpgradeShown=true;
+  const opening=['bolt','orbit','nova'];
+  let picks=firstUpgrade ? opening.map(id=>pool.find(c=>c.id===id)).filter(Boolean) : pool.slice(0,3);
+  if(firstUpgrade && picks.length<3) picks.push(...pool.filter(c=>!picks.includes(c)).slice(0,3-picks.length));
   if (chest){
     const w=pool.find(c=>c.kind==='weapon');
     if(w&&!picks.some(c=>c.kind==='weapon')) picks=[w,picks[0],picks[1]].filter(Boolean);
@@ -194,21 +203,24 @@ function buildCards(chest){
     const isW=c.kind==='weapon', data=isW?WEAPONS[c.id]:PASSIVES[c.id];
     const lv=isW?(player.weapons[c.id]?player.weapons[c.id].level:0):(player.passives[c.id]||0);
     const newW=isW&&lv===0;
-    const el=document.createElement('div');
-    el.className='card'+(chest&&newW?' rare':'');
-    el.innerHTML=`<div class="ci">${data.icon}</div>
+    const el=document.createElement('button');
+    el.type='button';
+    el.className='card card-'+c.id+(isW?' weapon':'')+(chest&&newW?' rare':'');
+    el.innerHTML=`<div class="ci">${itemIcon(c.id)}</div>
       <div class="cn">${data.name}</div>
-      <div class="cl">Lv ${lv} → ${lv+1}</div>
+      <div class="cl">${lv===0?`新获得 · Lv.${lv+1}`:`Lv.${lv} <span aria-hidden="true">→</span> Lv.${lv+1}`}</div>
       <div class="cd">${isW?data.desc(lv+1):data.desc}</div>
       <div class="ck">按 ${i+1}</div>`;
     el.addEventListener('click',()=>chooseCard(i));
     box.appendChild(el);
   });
-  document.getElementById('upTitle').textContent = chest?'🎁 宝箱！挑选战利品':'✨ 升级！选择强化';
-  const isTouch = matchMedia('(pointer:coarse)').matches || innerWidth<=640;
-  const base = isTouch?'点击卡牌选择':'点击卡牌，或按键盘 1 / 2 / 3 选择';
-  document.getElementById('upHint').textContent = chest?('宝箱奖励 · '+base):(game.pendingLevels>1?`还有 ${game.pendingLevels-1} 次升级等待 · ${base}`:base);
+  document.getElementById('upTitle').textContent = chest?'挑选宝箱奖励':firstUpgrade?'选一种打法':'选择强化';
+  document.getElementById('upHint').textContent = !chest&&game.pendingLevels>1
+    ? `另有 ${game.pendingLevels-1} 次强化待选择` : '';
+  document.getElementById('skipCardBtn').innerHTML =
+    (chest?'放弃宝箱奖励':'放弃本次强化')+' <span aria-hidden="true">→</span>';
   game.state='levelup'; show('levelup');
+  box.firstElementChild?.focus({preventScroll:true});
 }
 function popChest(){
   if(game.chestQueue>0){ game.chestQueue--; buildCards(true); return true; }
@@ -218,11 +230,19 @@ function chooseCard(i){
   const c=game.cards[i]; if(!c||game.state!=='levelup') return;
   if(c.kind==='weapon') addWeapon(c.id); else addPassive(c.id);
   Sound.chest();
-  hide('levelup');
+  resolveCardChoice();
+}
+function skipCard(){
+  if(game.state==='levelup') resolveCardChoice();
+}
+function resolveCardChoice(){
+  game.cards=[];
   if(game.cardMode==='level' && game.pendingLevels>0) game.pendingLevels--;
-  if (game.pendingLevels>0) buildCards(false);
-  else if(popChest()) { /* 弹出宝箱卡 */ }
-  else game.state='playing';
+  if(game.pendingLevels>0) buildCards(false);
+  else if(!popChest()){
+    game.state='playing';
+    dismissOverlay('levelup');
+  }
 }
 
 // === 伤害与击杀 ===
@@ -230,7 +250,7 @@ function damageEnemy(e, dmg, kx=0, ky=0, canCrit=true){
   if(e.dead) return;
   let d=dmg*player.damage, crit=false;
   if(canCrit && Math.random()<player.crit){ d*=2; crit=true; }
-  e.hp-=d; e.hit=0.12; e.sq=1; e.sqT=0.18;
+  e.hp-=d; e.hit=0.10; e.sq=1; e.sqT=0.18;
   const kl=Math.hypot(kx,ky)||1;
   const kb=e.type==='boss'||e.type==='elite'?0.12:1;
   e.kx+=kx/kl*70*kb; e.ky+=ky/kl*70*kb;
@@ -259,9 +279,8 @@ function killEnemy(e){
   if(e.mech==='split' && !e.isChild){
     for(let k=0;k<2;k++){
       const a=rand(0,TAU);
-      spawnEnemy('split', e.x+Math.cos(a)*20, e.y+Math.sin(a)*20);
-      const c=game.enemies[game.enemies.length-1];
-      if(c){ c.isChild=true; c.r=e.r*0.68; c.hp=c.maxHp=e.hp*0.42; c.xp=Math.max(1,Math.floor(e.xp/2)); }
+      const c=spawnEnemy('split', e.x+Math.cos(a)*20, e.y+Math.sin(a)*20);
+      if(c){ c.isChild=true; c.r=e.r*0.68; c.hp=c.maxHp=e.maxHp*0.42; c.xp=Math.max(1,Math.floor(e.xp/2)); }
     }
   }
   if(isElite){
@@ -309,19 +328,22 @@ function beginBossSequence(){
   for(const e of game.enemies){ if(e.type!=='boss'){ spawnParts(e.x,e.y,CFG.ART.xp.light,8,120); e.dead=true; } }
   game.enemies=game.enemies.filter(e=>e.type==='boss');
   game.ebullets.length=0;
+  game.hazards.length=0;
   game.flash=1; Juice.addTrauma(0.35);
   Juice.feedback('large',player.x,player.y,CFG.ART.xp.main);
   Sound.levelup();
   toast(`🌟 星光满溢！${game.bossKind.title}·${game.bossKind.name} 正在降临…`);
   // 用游戏内计时而非 setTimeout：暂停/切场景时不会错乱（step 循环里递减 bossSeqT）
   game.bossSeqT=CFG.LEVEL.bossSequence;
+  game.bossEntry={x:player.x,y:player.y-Math.min(VIEW.w,VIEW.h)*.32};
 }
 function spawnBoss(){
+  const entry=game.bossEntry||{x:player.x,y:player.y-Math.min(VIEW.w,VIEW.h)*.32};
+  game.boss=spawnEnemy('boss',entry.x,entry.y);
+  if(!game.boss) return;
   game.bossSpawned=true; game.bossIntro=false;
-  const ang=Math.random()*TAU, rad=Math.min(VIEW.w,VIEW.h)*0.78;
-  spawnEnemy('boss', player.x+Math.cos(ang)*rad, player.y+Math.sin(ang)*rad);
-  game.boss=game.enemies[game.enemies.length-1];
-  if(game.boss){ game.boss.maxPhase=game.bossGuard?2:3; game.boss.atk=1.2; }
+  game.boss.maxPhase=game.bossGuard?2:3;
+  game.boss.atk=1.5;
   showBossBar(true);
   toast(`⚔️ ${game.bossKind.title}·${game.bossKind.name} 登场！`); Sound.boss();
   Juice.feedback('large',game.boss.x,game.boss.y,game.bossKind.color);
@@ -355,6 +377,7 @@ function update(dt){
   if(v.x||v.y){ player.faceX=v.x; player.faceY=v.y; }
   player.ox=player.x; player.oy=player.y;
   player.x+=v.x*player.speed*dt; player.y+=v.y*player.speed*dt;
+  Rig.trackWalk(player,Math.hypot(player.x-player.ox,player.y-player.oy),dt,70);
 
   // 刷怪：维持屏幕数量模型（替代旧的间隔指数收紧，避免后期每秒几十只顶满上限）
   // 目标存活数 = (base + 玩家等级×perLv) × 本关密度系数，上限 targetCap；每秒最多补 refill 只。
@@ -364,12 +387,16 @@ function update(dt){
     const S=CFG.SPAWN, R=levelRoster(game.level);
     const target=Math.min(S.targetCap, Math.round((S.targetBase+player.level*S.targetPerLv)*R.density));
     let alive=0; for(const e of game.enemies) if(!e.dead&&e.type!=='boss') alive++;
-    const need=Math.min(S.refillPerSec, target-alive);
-    for(let i=0;i<need;i++) spawnEnemy(pickEnemyType());
+    if(alive<target){
+      // 第一只棉棉在场内给玩家一个明确的攻击与拾取目标。
+      if(game.levelTime<1 && alive===0) spawnEnemy('spore',player.x,player.y-Math.min(200,VIEW.h*.26));
+      else spawnEnemy(pickEnemyType());
+    }
   }
   game.eliteT-=dt;
   if(game.eliteT<=0 && !game.bossIntro && !game.bossSpawned){
-    game.eliteT=rand(26,36); spawnEnemy('elite'); toast('✨ 泡芙出现！');
+    game.eliteT=rand(26,36);
+    if(!game.enemies.some(e=>e.type==='elite'&&!e.dead) && spawnEnemy('elite')) toast('精英泡芙出现');
   }
 
   // 资源物：随机在玩家附近刷新星星水晶（打碎掉经验 + 小回血）
@@ -410,9 +437,13 @@ function update(dt){
 
 function updateEnemies(dt){
   const list=game.enemies;
+  const retireDistance=Math.hypot(VIEW.w,VIEW.h)*.73+240;
   for(let i=list.length-1;i>=0;i--){
     const e=list[i];
-    if(e.dead){ list.splice(i,1); continue; }
+    if(e.dead || (e.type!=='boss' && dist2(e.x,e.y,player.x,player.y)>retireDistance**2)){
+      list.splice(i,1);
+      continue;
+    }
     e.ox=e.x; e.oy=e.y;
     if(e.hit>0) e.hit-=dt;
     if(e.sqT>0) e.sqT-=dt; else e.sq=0;
@@ -426,10 +457,15 @@ function updateEnemies(dt){
     switch(e.mech){
       case 'dash': {
         e.dashT-=dt;
-        if(e.dashT<=0){ e.dashT=rand(1.1,1.8); e.zig=Math.random()<0.5?1:-1; }
-        const boost=e.dashT>0.75?1.9:0.75;
-        mvx=ux*0.55 - uy*e.zig*0.83; mvy=uy*0.55 + ux*e.zig*0.83;
-        spd*=boost;
+        if(e.dashT<=0){
+          e.dashT=rand(1.35,1.85);
+          e.dashLeft=.32; e.dashAngle=e.face;
+        }
+        const charging=e.dashT<0.32;
+        e.dashLeft=Math.max(0,(e.dashLeft||0)-dt);
+        const lunging=e.dashLeft>0;
+        if(lunging){ mvx=Math.cos(e.dashAngle); mvy=Math.sin(e.dashAngle); }
+        spd*=charging?.25:lunging?2.05:.72;
         break;
       }
       case 'stealth': {
@@ -484,9 +520,10 @@ function updateEnemies(dt){
         if(st!==e.phaseStage){
           e.phaseStage=st; game.shake=0; flashScreen(0.4);
           Juice.feedback('large',e.x,e.y,e.color);
-          toast(st===2?'第二形态：召唤小伙伴！':'最终形态：星光射线！');
+          toast(st===2?'第二形态 · 召唤伙伴':'最终形态 · 留意地面预警');
           showBossPhase(st);
         }
+        if(e.atk>2.1 && st===3) spd*=0.12;
         e.atk-=dt;
         if(e.atk<=0){
           const bc=e.color;
@@ -504,17 +541,22 @@ function updateEnemies(dt){
           } else {
             e.atk=3.2;
             const a=Math.atan2(dy,dx);
-            game.fx.push({type:'laserWarn',x:e.x,y:e.y,a,len:Math.max(VIEW.w,VIEW.h)*1.4,life:0.9,max:0.9,color:bc});
-            setTimeout(()=>{
-              if(game.state==='playing' && !e.dead){
-                game.fx.push({type:'laser',x:e.x,y:e.y,a,len:Math.max(VIEW.w,VIEW.h)*1.4,life:0.28,max:0.28,color:bc});
-                const px=player.x-e.x, py=player.y-e.y;
-                const proj=px*Math.cos(a)+py*Math.sin(a);
-                const perp=Math.abs(-px*Math.sin(a)+py*Math.cos(a));
-                if(proj>0 && proj<Math.max(VIEW.w,VIEW.h)*1.4 && perp<26) hurtPlayer(22);
-                Juice.addTrauma(0.3);
+            const len=Math.max(VIEW.w,VIEW.h)*1.4;
+            if(game.level===20){
+              for(const angle of [a-.28,a+.28]){
+                game.fx.push({type:'laserWarn',owner:e,x:e.x,y:e.y,a:angle,len,life:1.05,max:1.05,color:bc});
               }
-            },900);
+            } else {
+              // 莓莓铺开三连糖霜，抹茶封目标周边，云朵沿移动方向落下云团。
+              const offsets=game.level===5?[-75,0,75]:game.level===10?[0]:[0,80];
+              for(const offset of offsets){
+                const x=player.x+offset*(game.level===15?ux:-uy);
+                const y=player.y+offset*(game.level===15?uy:ux);
+                const life=game.level===10?1.15:.8;
+                game.fx.push({type:'bossCircle',owner:e,x,y,r:game.level===10?104:48,
+                  life,max:life,color:bc,pool:game.level===10});
+              }
+            }
           }
           Sound.hit();
         }
@@ -523,6 +565,9 @@ function updateEnemies(dt){
     }
 
     e.x+=(mvx*spd+e.kx)*dt; e.y+=(mvy*spd+e.ky)*dt;
+    // Knockback translates the body without accelerating the feet.
+    const advancing=e.mech==='dash' && e.dashT<.32?0:Math.hypot(mvx,mvy)*spd*dt;
+    Rig.trackWalk(e,advancing,dt,e.type==='boss'?34:e.type==='elite'?29:25);
     e.kx*=Math.pow(0.02,dt); e.ky*=Math.pow(0.02,dt);
     if(e.mech!=='explode' && d<e.r+player.r-4) hurtPlayer(e.dmg);
   }
@@ -564,7 +609,13 @@ function updateWeapons(dt){
         if(t){
           // 有目标才进入冷却：怪进圈的第一时间就开火，不会白等一个 CD
           wp.timer=def.cd*player.cooldown/(1+0.05*(wp.level-1));
-          const n=1+Math.floor(wp.level/2), ang=Math.atan2(t.y-player.y,t.x-player.x);
+          const n=1+Math.floor(wp.level/2);
+          const flight=Math.min(.45,Math.hypot(t.x-player.x,t.y-player.y)/470);
+          const lead=t.prop?0:flight/CFG.STEP;
+          const aimX=t.prop?t.x:t.x+(t.x-t.ox)*lead;
+          const aimY=t.prop?t.y:t.y+(t.y-t.oy)*lead;
+          const ang=Math.atan2(aimY-player.y,aimX-player.x);
+          Rig.startCast(player,game.time,ang);
           for(let k=0;k<n;k++){
             const a=ang+(k-(n-1)/2)*0.16;
             game.bullets.push({x:player.x,y:player.y,ox:player.x,oy:player.y,vx:Math.cos(a)*470,vy:Math.sin(a)*470,r:7,life:1.5,dmg:12,pierce:1+Math.floor(wp.level/2),hit:new Set(),kind:'bolt'});
@@ -578,11 +629,11 @@ function updateWeapons(dt){
         const targets=nearestEnemies(1+Math.floor(wp.level/2));
         if(targets.length){
           wp.timer=def.cd*player.cooldown;
+          const target=targets[0];
+          Rig.startCast(player,game.time,Math.atan2(target.y-player.y,target.x-player.x));
           for(const t of targets){
-            game.fx.push({type:'lightning',x1:player.x+rand(-30,30),y1:player.y-260,x2:t.x,y2:t.y,life:.18,max:.18});
-            if(t.prop) damageProp(t,26+wp.level*8,t.x-player.x,t.y-player.y);
-            else damageEnemy(t,26+wp.level*8,t.x-player.x,t.y-player.y,true);
-            spawnParts(t.x,t.y,'#ffe08a',6,120);
+            game.fx.push({type:'lightning',x1:t.x-95,y1:t.y-235,x2:t.x,y2:t.y,
+              life:.18,max:.18,damage:26+wp.level*8});
           }
           Sound.shoot();
         }
@@ -591,6 +642,7 @@ function updateWeapons(dt){
       wp.timer-=dt*player.fireRate;
       if(wp.timer<=0){
         wp.timer=def.cd*player.cooldown;
+        Rig.startCast(player,game.time);
         const R=180+wp.level*26;
         game.fx.push({type:'nova',x:player.x,y:player.y,r:10,R,life:.42,max:.42});
         for(const e of game.enemies){
@@ -601,7 +653,7 @@ function updateWeapons(dt){
           if(!p.dead && dist2(p.x,p.y,player.x,player.y)<R*R)
             damageProp(p,20+wp.level*10,p.x-player.x,p.y-player.y);
         }
-        Sound.kill();
+        Sound.nova();
         Juice.feedback('medium',player.x,player.y,null,CFG.FEEL.hitCap,'nova',0.5);
       }
     } else if(id==='orbit'){
@@ -684,7 +736,8 @@ function pickTargets(count, range){
     if(i>0 && list[i].tier>=list[0].tier) list.unshift(list.splice(i,1)[0]);
   }
   const best=list[0];
-  aimLock.ref=best.e; aimLock.until=game.time+CFG.AIM.stick; aimLock.tier=best.tier;
+  if(aimLock.ref!==best.e) aimLock.until=game.time+CFG.AIM.stick;
+  aimLock.ref=best.e; aimLock.tier=best.tier;
   game.aimTarget=best.e;
   return list.slice(0,count).map(o=>o.e);
 }
@@ -728,7 +781,7 @@ function updateGems(dt){
     const g=game.gems[i]; g.life-=dt;
     g.x+=g.vx*dt; g.y+=g.vy*dt; g.vx*=Math.pow(.02,dt); g.vy*=Math.pow(.02,dt);
     const d=Math.hypot(player.x-g.x,player.y-g.y);
-    if(d<player.pickup){
+    if(d>0 && d<player.pickup){
       const s=Math.min(1, 12*dt), pull=(player.pickup-d)*5.5;
       g.x+=(player.x-g.x)/d*s*pull; g.y+=(player.y-g.y)/d*s*pull;
     }
@@ -763,7 +816,37 @@ function updateFx(dt){
   for(let i=game.fx.length-1;i>=0;i--){
     const f=game.fx[i]; f.life-=dt;
     if(f.type==='nova') f.r+=(f.R-f.r)*Math.min(1,10*dt);
-    if(f.life<=0) game.fx.splice(i,1);
+    if(f.life>0) continue;
+    game.fx.splice(i,1);
+    if(f.type==='lightning' && game.state==='playing'){
+      game.fx.push({...f,type:'meteorImpact',life:.24,max:.24});
+      const radius=34;
+      for(const e of game.enemies){
+        if(!e.dead && dist2(e.x,e.y,f.x2,f.y2)<radius**2){
+          damageEnemy(e,f.damage,e.x-f.x2,e.y-f.y2);
+        }
+      }
+      for(const p of game.props){
+        if(!p.dead && dist2(p.x,p.y,f.x2,f.y2)<radius**2){
+          damageProp(p,f.damage,p.x-f.x2,p.y-f.y2);
+        }
+      }
+      spawnParts(f.x2,f.y2,'#ffe08a',6,120);
+      if(Juice.ready('meteor-sound',.1)) Sound.meteor();
+    }
+    if(f.type==='bossCircle' && !f.owner.dead && game.state==='playing'){
+      game.fx.push({...f,type:'bossBurst',life:.38,max:.38});
+      if(dist2(f.x,f.y,player.x,player.y)<f.r*f.r) hurtPlayer(22);
+      if(f.pool) game.hazards.push({x:f.x,y:f.y,r:f.r,life:3,max:3,tick:.35,color:f.color});
+    }
+    if(f.type==='laserWarn' && !f.owner.dead && game.state==='playing'){
+      game.fx.push({...f,type:'laser',life:.28,max:.28});
+      const px=player.x-f.x, py=player.y-f.y;
+      const along=px*Math.cos(f.a)+py*Math.sin(f.a);
+      const across=Math.abs(-px*Math.sin(f.a)+py*Math.cos(f.a));
+      if(along>0 && along<f.len && across<26) hurtPlayer(22);
+      Juice.addTrauma(.24);
+    }
   }
 }
 
@@ -786,13 +869,13 @@ function showResult(win, allDone=false){
   const t=document.getElementById('resTitle');
   const s=document.getElementById('resSub');
   if(allDone){
-    t.textContent='🎉 星光全收集！'; t.style.color='var(--gold)';
+    t.textContent='星光全收集！'; t.style.color='var(--gold)';
     s.textContent='你守护了所有场景，是最闪耀的星光卫士！';
   } else if(win){
-    t.textContent=`✨ 第 ${game.level} 关 通过！`; t.style.color='var(--gold)';
+    t.textContent=`第 ${game.level} 关通过`; t.style.color='var(--gold)';
     s.textContent=game.bossGuard?'击败关底守卫，继续下一关吧':'击败主题伙伴，继续下一关吧';
   } else {
-    t.textContent='💗 再试一次吧'; t.style.color='var(--red)';
+    t.textContent='再试一次吧'; t.style.color='var(--red)';
     s.textContent=`第 ${game.level} 关 · 坚持到了 ${player.level} 级`;
   }
   document.getElementById('rTime').textContent=fmtTime(game.levelTime);
@@ -800,9 +883,9 @@ function showResult(win, allDone=false){
   document.getElementById('rKills').textContent=game.levelKills;
   // 最终构筑：武器 + 被动清单（带等级），让每局的养成结果可见
   const build=[];
-  for(const k in player.weapons) build.push(WEAPONS[k].icon+WEAPONS[k].name+' '+player.weapons[k].level);
-  for(const k in player.passives) if(player.passives[k]>0) build.push(PASSIVES[k].icon+PASSIVES[k].name+' '+player.passives[k]);
-  const rb=document.getElementById('rBuild'); if(rb) rb.textContent=build.length?build.join('  '):'—';
+  for(const k in player.weapons) build.push(`<span>${itemIcon(k)}${WEAPONS[k].name} ${player.weapons[k].level}</span>`);
+  for(const k in player.passives) if(player.passives[k]>0) build.push(`<span>${itemIcon(k)}${PASSIVES[k].name} ${player.passives[k]}</span>`);
+  const rb=document.getElementById('rBuild'); if(rb) rb.innerHTML=build.length?build.join(''):'—';
   // 按钮：失败=重试；过关=下一关；通关=再玩一次
   const again=document.getElementById('againBtn');
   const next=document.getElementById('nextBtn');

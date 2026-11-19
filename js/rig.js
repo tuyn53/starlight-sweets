@@ -77,6 +77,37 @@ const Rig = (() => {
     return p;
   }
 
+  // Gait time follows actual travel; stopping or pausing doesn't advance a step.
+  function trackWalk(entity,distance,dt,stride){
+    entity.walkPrev=entity.walk||0;
+    entity.walk=entity.walkPrev+distance/stride*(TAU/9);
+    const target=clamp(distance/dt/55,0,1);
+    entity.walkStrength=(entity.walkStrength||0)+(target-(entity.walkStrength||0))*Math.min(1,dt*15);
+  }
+
+  function walkPose(entity,alpha){
+    const time=(entity.walkPrev||0)+((entity.walk||0)-(entity.walkPrev||0))*alpha;
+    const pose=sample('walk',time,entity.phase||0);
+    pose.strength=(entity.walkStrength||0)>.025?entity.walkStrength:0;
+    return pose;
+  }
+
+  const castDuration=.24;
+  function startCast(entity,time,angle){
+    entity.castStarted=time;
+    entity.castDirection=angle;
+  }
+
+  function castPose(entity,time){
+    const progress=(time-(entity.castStarted??-Infinity))/castDuration;
+    if(progress<0 || progress>=1) return null;
+    const angle=progress<.22
+      ? .14-(.51*progress/.22)
+      : -.37*(1-(progress-.22)/.78)**2;
+    const flash=clamp(1-progress*2.2,0,1);
+    return {angle,flash,direction:entity.castDirection};
+  }
+
   // ---- 绘制原语：三段明度 + 深色描边 ----
   function shape(path, fill, lw, stroke){
     if(fill){ ctx.fillStyle=fill; ctx.fill(path); }
@@ -252,5 +283,5 @@ const Rig = (() => {
     ctx.restore();
   }
 
-  return { sample, draw, setCtx, PAL };
+  return { sample, walkPose, trackWalk, startCast, castPose, draw, setCtx, PAL };
 })();

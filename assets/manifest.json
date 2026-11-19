@@ -6,7 +6,7 @@
       "id": "player-idle",
       "role": "player base pose",
       "path": "assets/characters/player.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 30,
       "technical": {
         "dimensions": "512x512",
@@ -43,7 +43,7 @@
       "id": "enemy-spore",
       "role": "苔姬 · normal enemy (poison cloud)",
       "path": "assets/characters/spore.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 44,
       "technical": {
         "dimensions": "512x512",
@@ -80,7 +80,7 @@
       "id": "enemy-swift",
       "role": "夜燕 · fast enemy",
       "path": "assets/characters/swift.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 44,
       "technical": {
         "dimensions": "512x512",
@@ -117,7 +117,7 @@
       "id": "enemy-split",
       "role": "绯樱 · splitting enemy",
       "path": "assets/characters/split.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 44,
       "technical": {
         "dimensions": "512x512",
@@ -154,7 +154,7 @@
       "id": "enemy-mimic",
       "role": "蜃影 · stealth enemy",
       "path": "assets/characters/mimic.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 44,
       "technical": {
         "dimensions": "512x512",
@@ -191,7 +191,7 @@
       "id": "enemy-thief",
       "role": "金狐 · experience-stealing enemy",
       "path": "assets/characters/thief.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 44,
       "technical": {
         "dimensions": "512x512",
@@ -228,7 +228,7 @@
       "id": "enemy-bomber",
       "role": "花火 · self-detonating enemy",
       "path": "assets/characters/bomber.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 44,
       "technical": {
         "dimensions": "512x512",
@@ -265,7 +265,7 @@
       "id": "enemy-elite",
       "role": "蜂姬 · summoner elite",
       "path": "assets/characters/elite.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 52,
       "technical": {
         "dimensions": "512x512",
@@ -302,7 +302,7 @@
       "id": "enemy-boss",
       "role": "夜魇 · three-phase boss",
       "path": "assets/characters/boss.png",
-      "status": "shipped",
+      "status": "archived",
       "runtime_height_px": 104,
       "technical": {
         "dimensions": "512x512",
@@ -333,6 +333,269 @@
         "in_engine_reviewed": true,
         "technical_checks_passed": true,
         "approved_by": "老大（样张审批通过 + 实机截图确认）"
+      }
+    },
+    {
+      "id": "player-star",
+      "role": "星光法师",
+      "path": "assets/characters/player-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "spore-star",
+      "role": "棉棉",
+      "path": "assets/characters/spore-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "swift-star",
+      "role": "跳跳",
+      "path": "assets/characters/swift-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "split-star",
+      "role": "团子",
+      "path": "assets/characters/split-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "mimic-star",
+      "role": "果冻",
+      "path": "assets/characters/mimic-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "thief-star",
+      "role": "焦糖",
+      "path": "assets/characters/thief-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "bomber-star",
+      "role": "爆米",
+      "path": "assets/characters/bomber-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "elite-star",
+      "role": "泡芙",
+      "path": "assets/characters/elite-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "guard-star",
+      "role": "关底守卫",
+      "path": "assets/characters/guard-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "boss-star",
+      "role": "莓莓",
+      "path": "assets/characters/boss-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "matcha-star",
+      "role": "抹茶",
+      "path": "assets/characters/matcha-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "souffle-star",
+      "role": "云朵",
+      "path": "assets/characters/souffle-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "forest-queen-star",
+      "role": "黑森林",
+      "path": "assets/characters/forest-queen-star.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "512x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "smooth"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "starlight-island",
+      "role": "加载、首页和星光岛地图背景",
+      "path": "assets/starlight-island.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "1536x1024",
+        "alpha": false
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "created_at": "2026-11-19",
+        "license": "AI-generated, project use"
       }
     }
   ]

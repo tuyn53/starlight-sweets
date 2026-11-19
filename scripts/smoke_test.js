@@ -1,7 +1,7 @@
 const fs=require('fs'),vm=require('vm');
 // 用法：在项目根目录执行  node scripts/smoke_test.js
 // 说明：拼接 js/ 核心脚本到 vm 沙箱，用最小 DOM 桩跑关卡/机制/选敌/渲染回归。
-const files=['js/config.js','js/core.js','js/rig.js','js/sprites.js','js/slicerig.js','js/logic.js','js/render.js'];
+const files=['js/config.js','js/core.js','js/rig.js','js/sprites.js','js/slicerig.js','js/logic.js','js/tilemap.js','js/render.js'];
 let code=files.map(f=>fs.readFileSync(f,'utf8')).join('\n');
 
 // --- DOM / browser stubs ---
@@ -11,7 +11,7 @@ function mkEl(){return {
   textContent:'', innerHTML:'',
   appendChild(){}, addEventListener(){},
   setAttribute(){}, getContext(){return ctx2d},
-  get style(){return this._style||(this._style={})},
+  get style(){return this._style||(this._style={setProperty(name,value){this[name]=value;}})},
 };}
 const gradient={addColorStop(){}};
 // Path2D 最小桩：rig 骨骼动画用 Path2D 画部件，这里只需吞掉所有路径调用
@@ -114,7 +114,7 @@ ok('满级进入演出', run('game.bossIntro')===true);
 run('for(var i=0;i<300;i++) update(CFG.STEP)');
 ok('Boss已降临', run('game.bossSpawned')===true);
 ok('主题Boss显示名=莓莓', run('game.boss.displayName')==='莓莓');
-ok('主题Boss血量(5000+5*500=7500)', run('game.boss.maxHp')===7500);
+ok('主题Boss血量(4800+5*330=6450)', run('game.boss.maxHp')===6450);
 ok('主题Boss三阶段(maxPhase=3)', run('game.boss.maxPhase')===3);
 run('killEnemy(game.boss)');
 ok('击杀主题Boss→clear', run('game.state')==='clear');
@@ -187,6 +187,105 @@ for(let lv of [1,7,13,18]){
     ok(`第${lv}关渲染通过`, true);
   }catch(e){ ok(`第${lv}关渲染`,false); console.log('    ',e.message); }
 }
+
+console.log('\n[9] 新版战斗回归');
+run('startLevel(1); gainXp(player.xpNext)');
+ok('首抽给出星芒、星环与星爆', run("game.cards.map(c=>c.id).join(',')")==='bolt,orbit,nova');
+run('chooseCard(1)');
+ok('取得星环并回到战斗', run("player.weapons.orbit.level===1 && game.state==='playing'"));
+run('startLevel(1)');
+ok('开局只有棉棉', run("Array.from({length:16},()=>pickEnemyType()).every(t=>t==='spore')"));
+run("spawnEnemy('split',0,0); damageEnemy(game.enemies[0],1000)");
+ok('过量击杀产生两只仍有生命的分裂怪', run('game.enemies.filter(e=>e.isChild && e.hp>0).length')===2);
+for(const [n, count, kind] of [[5,3,'bossCircle'],[10,1,'bossCircle'],[15,2,'bossCircle'],[20,2,'laserWarn']]){
+  run(`startLevel(${n}); spawnBoss(); player.x=30; game.boss.x=-120; game.boss.y=0;
+    game.boss.hp=game.boss.maxHp*.25; game.boss.atk=0; updateEnemies(.01);`);
+  ok(`第${n}关独立预警`,run(`game.fx.filter(f=>f.type==='${kind}').length`)===count);
+  ok(`第${n}关预警无即时伤害`,run('player.hp===player.maxHp'));
+  ok(`第${n}关预警按模拟步推进`,run(`updateFx(1.16); game.fx.every(f=>f.type!=='${kind}')`));
+}
+
+run("startLevel(20); spawnEnemy('spore',0,0);");
+ok('后期关卡首轮普通怪仍能用初始星芒击杀',run('game.enemies[0].hp===ETYPE.spore.hp'));
+run("startLevel(1); spawnEnemy('elite',3000,0); updateEnemies(CFG.STEP)");
+ok('远处过期的精英释放刷怪名额',run('game.enemies.length')===0);
+run("startLevel(1); spawnEnemy('spore',50,0); addWeapon('lightning'); player.weapons.lightning.timer=0; updateWeapons(.01)");
+ok('流星先显示落点预警',run("game.fx.some(f=>f.type==='lightning') && game.enemies[0].hp===game.enemies[0].maxHp"));
+run('updateFx(.2)');
+ok('流星落地后产生实际命中',run("game.enemies[0].dead && game.fx.some(f=>f.type==='meteorImpact')"));
+run('Juice.stop=0; Juice.hitStop(.09); Juice.tick(.03); Juice.hitStop(.02); Juice.tick(.03)');
+ok('重叠命中不会提前解除较长停顿',run('Juice.stop>.02'));
+run('Juice.tick(.04)');
+ok('统一实时钟让停顿恢复',run('Juice.stop')===0);
+
+console.log('\n[10] 栅格地图');
+ok('200 个种子可复现且能组合出 200 份区块布局',run(`(()=>{
+  const layout=seed=>Array.from({length:25},(_,i)=>terrainChunkVariant(seed,i%5-2,Math.floor(i/5)-2)).join(',');
+  const seeds=Array.from({length:200},(_,i)=>i+1);
+  return new Set(seeds.map(layout)).size===200 && seeds.every(seed=>layout(seed)===layout(seed));
+})()`));
+ok('四幕区块由固定数量的有效地块组成',run(`CFG.ACTS.every(({key})=>
+  Array.from({length:CHUNK_VARIANTS},(_,i)=>terrainChunkTiles(key,i)).every(tiles=>
+    tiles.length===CHUNK_SIDE**2 && tiles.every(tile=>TERRAIN_TILES[key].details.includes(tile))))`));
+ok('远距离移动复用已缓存的区块，切幕替换缓存',run(`(()=>{
+  for(let i=-20;i<=20;i++) drawTilemap(ctx,'meadow',1,{x:i*10000,y:i*-20000},390,844,20);
+  if(terrainChunks.size!==CHUNK_VARIANTS) return false;
+  const meadow=[...terrainChunks.values()];
+  drawTilemap(ctx,'forest',6,{x:-273,y:270},390,844,20);
+  return terrainTheme==='forest' && terrainChunks.size>0 && [...terrainChunks.values()].every(chunk=>!meadow.includes(chunk));
+})()`));
+
+console.log('\n[11] 走路骨骼');
+ok('走路双腿反相，步态相位取决于行进距离',run(`(()=>{
+  const fast={}, slow={};
+  Rig.trackWalk(fast,15,.06,60);
+  for(let i=0;i<5;i++) Rig.trackWalk(slow,3,.06,60);
+  const pose=Rig.walkPose(fast,1);
+  return Math.abs(fast.walk-slow.walk)<1e-12 && pose.legL>.4 && pose.legR<-.4;
+})()`));
+ok('停止移动时步态收回且相位停在最后一步',run(`(()=>{
+  const actor={};
+  Rig.trackWalk(actor,15,.06,60);
+  const lastStep=actor.walk;
+  for(let i=0;i<30;i++) Rig.trackWalk(actor,0,CFG.STEP,60);
+  return actor.walk===lastStep && Rig.walkPose(actor,1).strength===0;
+})()`));
+
+console.log('\n[12] 持杖施法');
+ok('星芒无目标时不触发挥杖',run(`(()=>{
+  startLevel(1); player.weapons.bolt.timer=0; updateWeapons(CFG.STEP);
+  return Rig.castPose(player,game.time)===null;
+})()`));
+ok('星芒、流星与星爆实际释放时触发挥杖，动作结束后复位',run(`['bolt','lightning','nova'].every(id=>{
+  startLevel(1); spawnEnemy('spore',100,0);
+  if(id!=='bolt'){ player.weapons={}; addWeapon(id); }
+  player.weapons[id].timer=0; updateWeapons(CFG.STEP);
+  const start=Rig.castPose(player,game.time);
+  const swing=Rig.castPose(player,game.time+.054);
+  return start?.angle>0 && swing?.angle<-.3 && Rig.castPose(player,game.time+.25)===null;
+})`));
+
+console.log('\n[13] 放弃卡牌');
+ok('放弃一次强化会消耗这次选择，不获得技能，继续处理下一次',run(`(()=>{
+  startLevel(1);
+  gainXp(player.xpNext+30);
+  const pending=game.pendingLevels;
+  skipCard();
+  return pending>1 && game.pendingLevels===pending-1 && game.state==='levelup' &&
+    Object.keys(player.weapons).length===1 && player.weapons.bolt.level===1 &&
+    Object.keys(player.passives).length===0;
+})()`));
+ok('放弃最后一次升级与排队宝箱后直接恢复战斗',run(`(()=>{
+  startLevel(1);
+  gainXp(player.xpNext);
+  game.chestQueue=1;
+  skipCard();
+  if(game.state!=='levelup'||game.cardMode!=='chest'||game.pendingLevels!==0) return false;
+  skipCard();
+  return game.state==='playing' && game.chestQueue===0 && game.cards.length===0 &&
+    Object.keys(player.weapons).length===1 && player.weapons.bolt.level===1 &&
+    Object.keys(player.passives).length===0;
+})()`));
 
 console.log(`\n===== 结果: ${pass} 通过 / ${fail} 失败 =====`);
 process.exit(fail?1:0);

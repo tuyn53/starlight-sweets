@@ -10,84 +10,13 @@
 <body>
 <canvas id="game"></canvas>
 
-<!-- 加载首屏：与首页共用同一片糖果世界，主角做主体，进度=星光汇聚 -->
-<div id="loading" role="status" aria-live="polite" aria-label="游戏资源加载中">
-  <div class="home-world load-world" aria-hidden="true">
-    <div class="sun-glow"></div>
-    <div class="cloud cloud-a"><i></i><i></i><i></i></div>
-    <div class="cloud cloud-b"><i></i><i></i><i></i></div>
-    <div class="cloud cloud-c"><i></i><i></i><i></i></div>
-    <div class="home-stars">
-      <i style="--x:10%;--y:18%;--d:0s;--s:1"></i><i style="--x:26%;--y:9%;--d:.7s;--s:.7"></i>
-      <i style="--x:58%;--y:14%;--d:1.4s;--s:.9"></i><i style="--x:82%;--y:22%;--d:.3s;--s:1.1"></i>
-      <i style="--x:90%;--y:40%;--d:1s;--s:.8"></i><i style="--x:14%;--y:52%;--d:1.5s;--s:.75"></i>
-    </div>
-    <div class="hill hill-back"></div>
-    <div class="hill hill-front"></div>
-    <div class="flower-field"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  </div>
-  <div class="load-burst" aria-hidden="true"></div>
+<div id="loading" class="story-sky" aria-label="游戏入口">
   <div class="load-core">
-    <!-- 品牌 LOGO：纯 SVG 内联绘制，不依赖任何网络图片，加载首帧即成形，永不穿帮 -->
-    <div class="load-logo" aria-hidden="true">
-      <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="lgHalo" cx="50%" cy="50%" r="52%">
-            <stop offset="0" stop-color="#fff0bd" stop-opacity=".9"/>
-            <stop offset=".55" stop-color="#ffd9ea" stop-opacity=".5"/>
-            <stop offset="1" stop-color="#ffd9ea" stop-opacity="0"/>
-          </radialGradient>
-          <!-- 主星：近白 → 草莓粉，与标题粉色同一色系 -->
-          <linearGradient id="lgStar" x1="0" y1="0" x2=".2" y2="1">
-            <stop offset="0" stop-color="#ffe0f0"/>
-            <stop offset=".42" stop-color="#ffb6db"/>
-            <stop offset="1" stop-color="#ff8fc0"/>
-          </linearGradient>
-          <!-- 中心星：白 → 浅蓝，呼应标题「大作战」的蓝 -->
-          <linearGradient id="lgCore" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#ffffff"/>
-            <stop offset="1" stop-color="#d8e8ff"/>
-          </linearGradient>
-        </defs>
-
-        <!-- 光晕：柔和粉黄，只做氛围，不抢主体 -->
-        <circle class="logo-halo" cx="80" cy="80" r="74" fill="url(#lgHalo)"/>
-
-        <!-- 主星：尖角四角星 + 白色圆角描边（与标题文字同一手法），腰收细才有"闪光"锐度 -->
-        <path d="M80 22 L98 62 L138 80 L98 98 L80 138 L62 98 L22 80 L62 62 Z"
-              fill="url(#lgStar)" stroke="#ffffff" stroke-width="8"
-              stroke-linejoin="round" paint-order="stroke"/>
-
-        <!-- 中心星：缩小到主星约三分之一，保证粉色主体不被掏空 -->
-        <path d="M80 60 L87 73 L100 80 L87 87 L80 100 L73 87 L60 80 L73 73 Z"
-              fill="url(#lgCore)" stroke="#ffffff" stroke-width="4"
-              stroke-linejoin="round" paint-order="stroke"/>
-
-        <!-- 糖粒：对角分布，暗示"甜"，不参与主体构图 -->
-        <circle cx="44" cy="48" r="3.6" fill="#ffd166"/>
-        <circle cx="118" cy="106" r="3.2" fill="#a9c4ff"/>
-        <circle cx="126" cy="52" r="2.8" fill="#ffb3d0"/>
-      </svg>
-    </div>
-    <!-- 标题用 SVG 文字：stroke + paint-order:stroke 描边在填充下层，绝不侵蚀字形（text-shadow 描边会糊死笔画） -->
-    <svg class="load-title" viewBox="0 0 380 86" role="img" aria-label="甜星大作战">
-      <text x="190" y="64" text-anchor="middle">
-        <tspan class="lt-pink">甜星</tspan><tspan class="lt-blue">大作战</tspan>
-      </text>
-    </svg>
+    <img class="load-logo" src="assets/starlight-shard.svg" alt="">
+    <h1>甜星大作战</h1>
     <div class="load-track"><i id="loadFill"></i></div>
-    <p class="load-status">
-      <span id="loadSub">正在收集星光…</span>
-      <i class="load-dot" aria-hidden="true"></i>
-      <b id="loadPct">0%</b>
-    </p>
-    <button id="loadStart" class="load-start hidden" type="button">
-      <!-- 同样用 SVG 文字：HTML 文本的 -webkit-text-stroke 不支持 paint-order，会在小字号上糊死笔画 -->
-      <svg class="ls-svg" viewBox="0 0 300 42" role="img" aria-label="轻触屏幕，开始冒险">
-        <text x="150" y="31" text-anchor="middle">轻触屏幕 · 开始冒险</text>
-      </svg>
-      <i class="ls-arrow" aria-hidden="true"></i>
-    </button>
+    <p class="load-status" role="status"><span id="loadSub">正在收集星光…</span><b id="loadPct">0%</b></p>
+    <button id="loadStart" class="btn hidden" type="button">进入星光岛 <span aria-hidden="true">→</span></button>
   </div>
 </div>
 
@@ -146,27 +75,31 @@
 
 <div id="hud">
   <div class="hud-top">
-    <div class="hud-player">
-      <div class="hud-avatar" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 3.2c1 2.6 2.2 3.8 4.8 4.8-2.6 1-3.8 2.2-4.8 4.8-1-2.6-2.2-3.8-4.8-4.8 2.6-1 3.8-2.2 4.8-4.8z"/><circle cx="17.2" cy="15.6" r="1.7"/><circle cx="7" cy="16.8" r="1.1"/></svg>
-        <span class="hud-lv"><small>LV</small><b id="hLevel">1</b></span>
+    <div class="hud-avatar" aria-label="角色等级">
+      <span class="hud-portrait"><img src="assets/characters/player-star.webp" alt=""></span>
+      <span class="hud-lv">Lv.<b id="hLevel">1</b></span>
+    </div>
+    <div class="hud-bars">
+      <div class="hbar hp" id="hpBar">
+        <span class="hbar-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 20.6C6.4 16.4 3.2 12.9 3.2 9.3 3.2 6.4 5.4 4.4 8 4.4c1.7 0 3.1.8 4 2.1.9-1.3 2.3-2.1 4-2.1 2.6 0 4.8 2 4.8 4.9 0 3.6-3.2 7.1-8.8 11.3z"/><ellipse class="shine" cx="8.4" cy="8.6" rx="1.7" ry="1.1" transform="rotate(-24 8.4 8.6)"/></svg>
+        </span>
+        <div class="hbar-track"><i id="hpFill"></i><span class="hbar-text" id="hpText">100 / 100</span></div>
       </div>
-      <div class="hud-bars">
-        <div class="hbar hp" id="hpBar">
-          <span class="hbar-ico" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 20.6C6.4 16.4 3.2 12.9 3.2 9.3 3.2 6.4 5.4 4.4 8 4.4c1.7 0 3.1.8 4 2.1.9-1.3 2.3-2.1 4-2.1 2.6 0 4.8 2 4.8 4.9 0 3.6-3.2 7.1-8.8 11.3z"/><ellipse class="shine" cx="8.4" cy="8.6" rx="1.7" ry="1.1" transform="rotate(-24 8.4 8.6)"/></svg>
-          </span>
-          <div class="hbar-track"><i id="hpFill"></i><span class="hbar-text" id="hpText">100 / 100</span></div>
-        </div>
-        <div class="hbar xp">
-          <span class="hbar-ico" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 2.8l2.6 5.5 6 .8-4.4 4.2 1.1 5.9L12 16.4l-5.3 2.8 1.1-5.9L3.4 9.1l6-.8L12 2.8z"/><ellipse class="shine" cx="9.3" cy="8.2" rx="1.5" ry="0.9" transform="rotate(-30 9.3 8.2)"/></svg>
-          </span>
-          <div class="hbar-track"><i id="xpFill"></i><span class="hbar-text dim">经验</span></div>
-        </div>
+      <div class="hbar xp">
+        <span class="hbar-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2.8l2.6 5.5 6 .8-4.4 4.2 1.1 5.9L12 16.4l-5.3 2.8 1.1-5.9L3.4 9.1l6-.8L12 2.8z"/><ellipse class="shine" cx="9.3" cy="8.2" rx="1.5" ry="0.9" transform="rotate(-30 9.3 8.2)"/></svg>
+        </span>
+        <div class="hbar-track"><i id="xpFill"></i><span class="hbar-text dim">经验</span></div>
       </div>
     </div>
-    <div class="hud-right">
+    <button id="pauseBtn" class="hud-pause" type="button" aria-label="暂停游戏" title="暂停 / 退出（Esc）">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="3" width="5.6" height="18" rx="2.4"/><rect x="13.9" y="3" width="5.6" height="18" rx="2.4"/></svg>
+    </button>
+  </div>
+  <div class="hud-stage">
+    <span class="hud-act"><span class="hud-act-icon" id="hActIcon" aria-hidden="true">🌻</span><span id="hActName">阳光草地 · 第 1 关</span></span>
+    <div class="hud-stats">
       <div class="hud-stat" aria-label="本关用时">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.6" r="8.2"/><path d="M12 8v4.9l3.4 2.1"/><path d="M9 2.6h6" /></svg>
         <b id="hTime">00:00</b>
@@ -175,16 +108,10 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4c4.4 0 7.6 3 7.6 7.2 0 2.5-1.1 4.3-2.9 5.4l-.4 3.2c-.1.8-.8 1.4-1.6 1.4h-5.4c-.8 0-1.5-.6-1.6-1.4l-.4-3.2c-1.8-1.1-2.9-2.9-2.9-5.4 0-4.2 3.2-7.2 7.6-7.2z"/><circle class="hole" cx="9.2" cy="11" r="1.7"/><circle class="hole" cx="14.8" cy="11" r="1.7"/><path class="hole" d="M11 15.4h2l-1 1.6z"/></svg>
         <b id="hKills">0</b>
       </div>
-      <button id="pauseBtn" class="hud-pause" type="button" aria-label="暂停并退出游戏" title="暂停 / 退出（Esc）">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.2" y="4.6" width="4.4" height="14.8" rx="2"/><rect x="13.4" y="4.6" width="4.4" height="14.8" rx="2"/></svg>
-      </button>
     </div>
   </div>
-  <div class="hud-goal">
-    <span class="hud-act" id="hActName">🌼 阳光草地</span>
-    <div class="hbar-track goal"><i id="goalFill"></i><span class="hbar-text" id="hGoal">目标</span></div>
-  </div>
   <div id="wpanel"></div>
+  <div id="toast"></div>
 </div>
 
 <div id="bossbar">
@@ -192,87 +119,53 @@
   <div class="bar boss"><i id="bossFill"></i></div>
 </div>
 
-<div id="menu" class="screen home-screen">
-  <div class="home-world" aria-hidden="true">
-    <div class="sun-glow"></div>
-    <div class="cloud cloud-a"><i></i><i></i><i></i></div>
-    <div class="cloud cloud-b"><i></i><i></i><i></i></div>
-    <div class="cloud cloud-c"><i></i><i></i><i></i></div>
-    <div class="home-stars">
-      <i style="--x:8%;--y:20%;--d:0s;--s:1"></i><i style="--x:22%;--y:10%;--d:.7s;--s:.7"></i>
-      <i style="--x:42%;--y:18%;--d:1.4s;--s:.85"></i><i style="--x:57%;--y:8%;--d:.3s;--s:1.1"></i>
-      <i style="--x:78%;--y:16%;--d:1s;--s:.8"></i><i style="--x:91%;--y:32%;--d:1.8s;--s:1"></i>
-      <i style="--x:12%;--y:57%;--d:1.2s;--s:.75"></i><i style="--x:48%;--y:62%;--d:.5s;--s:.65"></i>
-    </div>
-    <div class="hill hill-back"></div>
-    <div class="hill hill-front"></div>
-    <div class="flower-field"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  </div>
-
+<div id="menu" class="screen home-screen story-sky">
   <main class="home-shell">
     <section class="home-copy" aria-labelledby="gameTitle">
-      <div class="eyebrow"><i></i> SWEET STAR BLITZ <i></i></div>
-      <div class="title-wrap">
-        <span class="title-spark" aria-hidden="true">✦</span>
-        <h1 id="gameTitle"><span class="title-pink">甜星</span><span class="title-blue">大作战</span></h1>
-        <span class="title-ribbon">和伙伴一起，奔向闪闪发光的世界</span>
-      </div>
-      <p class="home-tagline">收集星星，结识甜点伙伴<br>开启一场软乎乎的魔法冒险</p>
-      <button class="btn home-play" id="startBtn" aria-label="开始冒险，选择关卡">
-        <span class="play-star" aria-hidden="true"><img src="assets/starlight-shard.svg" alt=""></span>
-        <span class="play-copy"><strong>开始冒险</strong><small>星光之旅等着你</small></span>
-        <span class="play-arrow" aria-hidden="true">›</span>
+      <div class="wordmark" lang="en">SWEET STAR BLITZ</div>
+      <h1 id="gameTitle">甜星<span>大作战</span></h1>
+      <p class="home-tagline">在星光岛收集星星，把小小的魔法变成自己的打法。</p>
+      <button class="btn home-play" id="startBtn" type="button">
+        <img src="assets/starlight-shard.svg" alt="">
+        <span class="play-copy"><strong>开始冒险</strong><small>选择冒险关卡</small></span>
+        <span aria-hidden="true">→</span>
       </button>
-      <div class="save-summary"><i></i><span id="menuProgress">冒险进度 · 已解锁 1 / 20 关</span></div>
-      <div class="feature-row" aria-label="游戏特色">
-        <span><i class="feature-dot move-dot"></i>自由移动</span>
-        <span><i class="feature-dot auto-dot"></i>自动攻击</span>
-        <span><i class="feature-dot card-dot"></i>升级三选一</span>
-      </div>
+      <p id="menuProgress"></p>
     </section>
-
-    <section class="hero-area" aria-label="主角和星灵伙伴">
-      <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="speech-bubble"><span>今天也要</span><strong>闪闪发光！</strong></div>
-      <div class="hero-character"><canvas class="rig-canvas" data-kind="player" data-pose="cheer" aria-label="星光小法师"></canvas></div>
-      <div class="companion companion-left">
-        <canvas class="rig-canvas" data-kind="spore" data-pose="idle" aria-label="伙伴棉棉"></canvas><span>棉棉</span>
-      </div>
-      <div class="companion companion-right">
-        <canvas class="rig-canvas" data-kind="split" data-pose="idle" aria-label="伙伴团子"></canvas><span>团子</span>
-      </div>
-      <div class="hero-platform" aria-hidden="true"><i></i></div>
-      <img class="orbit-spark spark-one" src="assets/starlight-shard.svg" alt="">
-      <img class="orbit-spark spark-two" src="assets/starlight-shard.svg" alt="">
-      <img class="orbit-spark spark-three" src="assets/starlight-shard.svg" alt="">
+    <section class="hero-area" aria-label="星光法师和甜点伙伴">
+      <div class="hero-orbit" aria-hidden="true"></div>
+      <div class="hero-character"><canvas class="rig-canvas" data-kind="player" data-pose="cheer" aria-label="星光法师"></canvas></div>
+      <figure class="companion companion-left">
+        <canvas class="rig-canvas" data-kind="spore" data-pose="idle" aria-hidden="true"></canvas><figcaption>棉棉</figcaption>
+      </figure>
+      <figure class="companion companion-right">
+        <canvas class="rig-canvas" data-kind="split" data-pose="idle" aria-hidden="true"></canvas><figcaption>团子</figcaption>
+      </figure>
     </section>
   </main>
-
-  <div class="home-bottom">
-    <div class="control-tip"><span>拖动屏幕移动</span><i></i><span>电脑 WASD / 方向键</span></div>
-    <div class="control-tip tip-settings"><span>左上角 ⚙ 可调整音效与动效</span></div>
-  </div>
 </div>
 
-<!-- 全局转场：几朵白云从四角涌来合拢填满，切换后再散开。
-     云来自首页的同一个世界（云/天空/草地），配色沿用画面本身的蓝白，不另起一套。 -->
 <div id="sceneTransition" class="hidden" aria-hidden="true">
-  <div class="cloud-base"></div>
-</div>
-</div>
+  <div class="scene-iris"></div>
+  <img class="scene-spark" src="assets/starlight-shard.svg" alt="">
 </div>
 
 <div id="levels" class="screen hidden">
-  <h2>🗺️ 选择关卡</h2>
+  <h2>星光岛地图</h2>
   <div class="sub" id="levelSub">已解锁至第 1 关</div>
   <div id="levelGrid"></div>
   <button class="btn ghost" id="backMenuBtn">返回首页</button>
 </div>
 
 <div id="levelup" class="screen hidden">
-  <h2 id="upTitle">✨ 升级！选择强化</h2>
-  <div class="hint" id="upHint">点击卡牌选择</div>
-  <div id="cards"></div>
+  <section class="reward-drawer" role="dialog" aria-modal="true" aria-labelledby="upTitle">
+    <header class="reward-head">
+      <h2 id="upTitle">选择强化</h2>
+      <p id="upHint" aria-live="polite"></p>
+    </header>
+    <div id="cards"></div>
+    <button id="skipCardBtn" type="button">放弃本次强化 <span aria-hidden="true">→</span></button>
+  </section>
 </div>
 
 <div id="result" class="screen hidden">
@@ -301,16 +194,16 @@
       </span>
       <h2 id="pauseTitle">休息一下</h2>
     </div>
-    <p class="pause-sub">星光之旅先暂停，随时可以继续</p>
+    <p class="pause-sub" id="hGoal">升至 Lv20 迎战关底</p>
     <div class="pause-actions">
       <button class="btn pause-continue" id="pauseContinue" type="button">▶ 继续游戏</button>
+      <button class="btn ghost" id="pauseSettings" type="button" aria-haspopup="dialog" aria-controls="settingsPanel" aria-expanded="false">游戏设置</button>
       <button class="btn ghost" id="pauseRestart" type="button">重试本关</button>
       <button class="btn ghost" id="pauseQuit" type="button">退出到选关</button>
     </div>
   </section>
 </div>
 
-<div id="toast"></div>
 <script src="js/config.js"></script>
 <script src="js/core.js"></script>
 <script src="js/music.js"></script>
@@ -318,6 +211,7 @@
 <script src="js/sprites.js"></script>
 <script src="js/slicerig.js"></script>
 <script src="js/logic.js"></script>
+<script src="js/tilemap.js"></script>
 <script src="js/render.js"></script>
 <script src="js/main.js"></script>
 </body>
