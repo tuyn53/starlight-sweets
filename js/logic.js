@@ -2,7 +2,7 @@
 const game = {
   state:'menu', level:1, unlocked:1, levelTime:0, levelKills:0,
   time:0, kills:0, totalXp:0, spawnT:0, eliteT:0,
-  bossSpawned:false, boss:null, bossKind:null,
+  bossSpawned:false, bossIntro:false, boss:null, bossKind:null, bossGuard:false,
   cards:[], cardMode:'level', pendingLevels:0,
   cam:{x:0,y:0}, shake:0, flash:0, toastT:0,
   enemies:[], bullets:[], ebullets:[], gems:[], chests:[], props:[], parts:[], dmgTexts:[], fx:[], hazards:[],
@@ -28,14 +28,15 @@ function makePlayer(){
   };
 }
 
-// === 开启一关：每关一局，起跑线随关卡增强以平衡难度递增 ===
+// === 开启一关：每关 = 一次完整的 Lv1→Lv20 单局，关卡之间不继承任何数值 ===
 function startLevel(n){
   n=clamp(n,1,CFG.LEVEL.total);
+  const theme=isBossLevel(n);
   Object.assign(game,{
     state:'playing', level:n, levelTime:0, levelKills:0,
-    time:0, kills:0, totalXp:0, spawnT:1.0, eliteT:28, propT:6, lastAnnounce:'spore',
-    sporeMutated:false, bossSpawned:false, boss:null,
-    bossKind:isBossLevel(n)?bossInfo(n):null,
+    time:0, kills:0, totalXp:0, spawnT:0.8, eliteT:45, propT:6, lastAnnounce:null,
+    sporeMutated:false, bossSpawned:false, bossIntro:false, boss:null,
+    bossKind:theme?bossInfo(n):guardInfo(n), bossGuard:!theme,
     cards:[], pendingLevels:0, chestQueue:0,
     enemies:[], bullets:[], ebullets:[], gems:[], chests:[], props:[], parts:[], dmgTexts:[], fx:[], hazards:[],
     shake:0, flash:0,
@@ -46,35 +47,31 @@ function startLevel(n){
   player=makePlayer();
   aimLock.ref=null; aimLock.until=0; game.aimTarget=null;   // 每关重置目标锁定
 
-  // 关卡加成：越高关起跑线越强（生命/伤害/速度 + 开局武器等级）
-  const bonus=n-1;
-  player.maxHp=CFG.BASE.hp+bonus*10; player.hp=player.maxHp;
-  player.damage=1+bonus*0.10;
-  player.speed=CFG.BASE.speed+bonus*4;
+  // 第 1 关与第 20 关起手完全一致：Lv1 + 星芒一把，无起跑线加成
   addWeapon('bolt');
-  for(let i=0;i<Math.floor(bonus/3);i++) addWeapon('bolt');
-  if(n>=6)  addWeapon('orbit');
-  if(n>=11) addWeapon('aura');
-  if(n>=16) addWeapon('nova');
 
   hide('menu'); hide('levels'); hide('result'); hide('levelup'); showBossBar(false);
   hudCache={};
   updateHUD(true);
   const act=actOf(n);
-  toast(isBossLevel(n)?`第 ${n} 关 · ${act.name} · ${game.bossKind.title} 等着你`:`第 ${n} 关 · ${act.name} · 加油！`);
+  toast(theme?`第 ${n} 关 · ${act.name} · ${game.bossKind.title} 等着你`:`第 ${n} 关 · ${act.name} · 升到 Lv${CFG.LEVEL.playerMax} 迎战关底守卫！`);
 }
 
 // === 刷怪 & 掉落 ===
 function spawnEnemy(type, x, y){
   if (game.enemies.length >= CFG.MAX_ENEMIES) return;
-  const t = ETYPE[type];
-  const scale = 1 + game.time*0.011 + (game.level-1)*CFG.LEVEL.diffStep + (player.level-1)*0.04;
+  const t = ETYPE[type], L=CFG.LEVEL;
+  // 敌人成长：关卡号主导、时间微弱，等级只轻度联动（旧公式 time×0.011 在 10 分钟时 +6.6 倍会压死构筑）
+  const scale = 1 + (game.level-1)*L.diffStep + game.levelTime*L.diffTime + (player.level-1)*L.diffLv;
   const ang = Math.random()*TAU;
   const rad = Math.max(VIEW.w,VIEW.h)*0.62 + rand(30,140);
   const px = x!==undefined ? x : player.x+Math.cos(ang)*rad;
   const py = y!==undefined ? y : player.y+Math.sin(ang)*rad;
   let hp=t.hp*scale;
-  if(type==='boss') hp=900+game.level*180;
+  // 关底血量：主题 Boss 与关底守卫分开定价，满级构筑下也能打 40-90 秒
+  if(type==='boss') hp=game.bossGuard
+    ? L.guardHpBase+game.level*L.guardHpStep
+    : L.bossHpBase+game.level*L.bossHpStep;
   const color=type==='boss'&&game.bossKind?game.bossKind.color:t.color;
   game.enemies.push({
     id:uid++, type, x:px, y:py, ox:px, oy:py, r:t.r,
@@ -89,20 +86,22 @@ function spawnEnemy(type, x, y){
     toxic:!(type==='spore' && game.time<CFG.SPORE.safeTime),
   });
 }
-// 随时间解锁新怪：每种怪登场时给一次提示
+// 关内波次：本关可用怪池按关内时间逐波释放（阵容表给"可用池"，波次给"登场节奏"）
+// 与旧的"全体从开局混编"相比：L1 只有 3 种怪打一整局，靠波次维持变化。
+const WAVE_TIME=[0, 45, 150, 300]; // 第 1/2/3/4 波起始秒数（对应 10 分钟模板）
 function pickEnemyType(){
-  const t=game.time, S=CFG.SPORE;
+  const S=CFG.SPORE, t=game.levelTime;
   if(t>=S.safeTime && !game.sporeMutated){
     game.sporeMutated=true; toast('✨ 棉棉长大了：倒下会留下糖霜云！');
   }
-  const pool=['spore','spore','spore'];
-  if(t>6) pool.push('swift');
-  if(t>24) pool.push('split');
-  if(t>38) pool.push('mimic');
-  if(t>52) pool.push('thief');
-  if(t>66) pool.push('bomber');
-  const type=pool[randInt(0,pool.length-1)];
-  if(type!==game.lastAnnounce && (type==='swift'||type==='split'||type==='mimic'||type==='thief'||type==='bomber')){
+  const roster=levelRoster(game.level).pool;
+  // 波次只放开"本关池"的前若干种：第 1 波前 2 种，之后每波 +1，最多到本关池上限
+  let wave=1;
+  for(let i=1;i<WAVE_TIME.length;i++) if(t>=WAVE_TIME[i]) wave=i+1;
+  const open=Math.min(roster.length, Math.max(2, wave+1));
+  const active=roster.slice(0,open);
+  const type=active[randInt(0,active.length-1)];
+  if(type!==game.lastAnnounce && active.indexOf(type)===open-1 && open>2){
     game.lastAnnounce=type; toast('✨ 新伙伴登场：'+ETYPE[type].name);
   }
   return type;
@@ -157,9 +156,9 @@ function addPassive(id){
   const p=player.passives; if(!p[id]) p[id]=0; p[id]++;
   const L=p[id];
   switch(id){
-    case 'damage': player.damage=1+0.18*L+(game.level-1)*0.10; break;
+    case 'damage': player.damage=1+0.18*L; break;
     case 'firerate': player.fireRate=1+0.14*L; break;
-    case 'speed': player.speed=CFG.BASE.speed*(1+0.10*L)+(game.level-1)*4; break;
+    case 'speed': player.speed=CFG.BASE.speed*(1+0.10*L); break;
     case 'maxhp': player.maxHp+=25; player.hp=Math.min(player.maxHp,player.hp+25); break;
     case 'pickup': player.pickup=CFG.BASE.pickup*(1+0.28*L); break;
     case 'armor': player.armor=L; break;
@@ -285,8 +284,10 @@ function hurtPlayer(dmg){
   if(player.hp<=0){ player.hp=0; gameover(); }
 }
 function gainXp(v){
+  // 满级停经验：Lv20 后经验球转为微量回血，避免"满级还在捡垃圾"
+  if(player.level>=CFG.LEVEL.playerMax){ player.hp=Math.min(player.maxHp,player.hp+v*0.5); return; }
   player.xp+=v; game.totalXp+=v;
-  while(player.xp>=player.xpNext){
+  while(player.xp>=player.xpNext && player.level<CFG.LEVEL.playerMax){
     player.xp-=player.xpNext; player.level++;
     player.xpNext=Math.floor(CFG.XP_BASE*Math.pow(CFG.XP_GROW,player.level-1))+player.level;
     player.hp=Math.min(player.maxHp,player.hp+8);
@@ -294,15 +295,35 @@ function gainXp(v){
     Sound.levelup(); spawnParts(player.x,player.y,CFG.ART.xp.light,20,180);
     Juice.feedback('medium',player.x,player.y,CFG.ART.xp.main);
   }
+  // 刚好升到满级：清空溢出经验，交给 update 里的满级判定触发关底序列
+  if(player.level>=CFG.LEVEL.playerMax) player.xp=0;
   if(game.pendingLevels>0 && game.state==='playing') buildCards(false);
 }
 
+// === 满级关底序列：清场 → 星光演出 → Boss/守卫降临 ===
+function beginBossSequence(){
+  if(game.bossSpawned||game.bossIntro||game.state!=='playing') return;
+  game.bossIntro=true;
+  clearToast();
+  // 清场：残留小怪与弹幕化星光消散，给决战留出干净场地
+  for(const e of game.enemies){ if(e.type!=='boss'){ spawnParts(e.x,e.y,CFG.ART.xp.light,8,120); e.dead=true; } }
+  game.enemies=game.enemies.filter(e=>e.type==='boss');
+  game.ebullets.length=0;
+  game.flash=1; Juice.addTrauma(0.35);
+  Juice.feedback('large',player.x,player.y,CFG.ART.xp.main);
+  Sound.levelup();
+  toast(`🌟 星光满溢！${game.bossKind.title}·${game.bossKind.name} 正在降临…`);
+  // 用游戏内计时而非 setTimeout：暂停/切场景时不会错乱（step 循环里递减 bossSeqT）
+  game.bossSeqT=CFG.LEVEL.bossSequence;
+}
 function spawnBoss(){
-  game.bossSpawned=true;
+  game.bossSpawned=true; game.bossIntro=false;
   const ang=Math.random()*TAU, rad=Math.min(VIEW.w,VIEW.h)*0.78;
   spawnEnemy('boss', player.x+Math.cos(ang)*rad, player.y+Math.sin(ang)*rad);
   game.boss=game.enemies[game.enemies.length-1];
-  showBossBar(true); toast(`🌟 ${game.bossKind.title}·${game.bossKind.name} 登场！`); Sound.boss();
+  if(game.boss){ game.boss.maxPhase=game.bossGuard?2:3; game.boss.atk=1.2; }
+  showBossBar(true);
+  toast(`⚔️ ${game.bossKind.title}·${game.bossKind.name} 登场！`); Sound.boss();
   Juice.feedback('large',game.boss.x,game.boss.y,game.bossKind.color);
 }
 
@@ -335,17 +356,21 @@ function update(dt){
   player.ox=player.x; player.oy=player.y;
   player.x+=v.x*player.speed*dt; player.y+=v.y*player.speed*dt;
 
-  // 刷怪：随关卡收紧间隔
+  // 刷怪：维持屏幕数量模型（替代旧的间隔指数收紧，避免后期每秒几十只顶满上限）
+  // 目标存活数 = (base + 玩家等级×perLv) × 本关密度系数，上限 targetCap；每秒最多补 refill 只。
   game.spawnT-=dt;
-  if(game.spawnT<=0){
-    const lvShrink=Math.pow(0.985,game.level-1);
-    const interval=Math.max(CFG.SPAWN.min, CFG.SPAWN.start*Math.pow(CFG.SPAWN.decay,game.time)*lvShrink);
-    game.spawnT=interval;
-    const batch=1+Math.floor(game.time/50)+Math.floor((game.level-1)/6);
-    for(let i=0;i<batch;i++) spawnEnemy(pickEnemyType());
+  if(game.spawnT<=0 && !game.bossIntro && !game.bossSpawned){
+    game.spawnT=1/CFG.SPAWN.refillPerSec;
+    const S=CFG.SPAWN, R=levelRoster(game.level);
+    const target=Math.min(S.targetCap, Math.round((S.targetBase+player.level*S.targetPerLv)*R.density));
+    let alive=0; for(const e of game.enemies) if(!e.dead&&e.type!=='boss') alive++;
+    const need=Math.min(S.refillPerSec, target-alive);
+    for(let i=0;i<need;i++) spawnEnemy(pickEnemyType());
   }
   game.eliteT-=dt;
-  if(game.eliteT<=0 && !isBossLevel(game.level)){ game.eliteT=rand(26,36); spawnEnemy('elite'); toast('✨ 泡芙出现！'); }
+  if(game.eliteT<=0 && !game.bossIntro && !game.bossSpawned){
+    game.eliteT=rand(26,36); spawnEnemy('elite'); toast('✨ 泡芙出现！');
+  }
 
   // 资源物：随机在玩家附近刷新星星水晶（打碎掉经验 + 小回血）
   game.propT-=dt;
@@ -354,8 +379,15 @@ function update(dt){
     if(game.props.length<4) spawnProp();
   }
 
-  // Boss 关：开场延迟后降临
-  if(isBossLevel(game.level) && !game.bossSpawned && game.levelTime>=CFG.LEVEL.bossDelay) spawnBoss();
+  // 满级触发关底序列：升级卡选完后、达成 Lv20 即进入演出
+  if(player.level>=CFG.LEVEL.playerMax && !game.bossSpawned && !game.bossIntro && game.state==='playing' && game.pendingLevels<=0){
+    beginBossSequence();
+  }
+  // 演出计时（游戏内时间，暂停时不推进）
+  if(game.bossIntro){
+    game.bossSeqT-=dt;
+    if(game.bossSeqT<=0) spawnBoss();
+  }
 
   updateEnemies(dt);
   updateWeapons(dt);
@@ -369,11 +401,7 @@ function update(dt){
   updateDmgTexts(dt);
   updateFx(dt);
 
-  // 普通关：存活 + 击杀双目标达成即过关
-  if(!isBossLevel(game.level) && game.state==='playing'){
-    const tar=levelTargets(game.level);
-    if(game.levelTime>=tar.time && game.levelKills>=tar.kills) levelClear();
-  }
+  // 过关唯一条件：击杀关底（主题 Boss / 关底守卫），见 killEnemy→levelClear
 
   const tx=player.x-VIEW.w/2, ty=player.y-VIEW.h/2;
   game.cam.x+=(tx-game.cam.x)*Math.min(1,9*dt);
@@ -450,7 +478,9 @@ function updateEnemies(dt){
       }
       case 'phase': {
         const pct=e.hp/e.maxHp;
-        const st=pct>0.66?1:pct>0.33?2:3;
+        // 关底守卫两阶段封顶（跳过蓄力激光），主题 Boss 三阶段完整
+        const maxP=e.maxPhase||3;
+        const st=Math.min(maxP, pct>0.66?1:pct>0.33?2:3);
         if(st!==e.phaseStage){
           e.phaseStage=st; game.shake=0; flashScreen(0.4);
           Juice.feedback('large',e.x,e.y,e.color);
@@ -760,15 +790,19 @@ function showResult(win, allDone=false){
     s.textContent='你守护了所有场景，是最闪耀的星光卫士！';
   } else if(win){
     t.textContent=`✨ 第 ${game.level} 关 通过！`; t.style.color='var(--gold)';
-    s.textContent=isBossLevel(game.level)?'击败了主题伙伴，继续下一关吧':'目标达成，继续下一关吧';
+    s.textContent=game.bossGuard?'击败关底守卫，继续下一关吧':'击败主题伙伴，继续下一关吧';
   } else {
     t.textContent='💗 再试一次吧'; t.style.color='var(--red)';
     s.textContent=`第 ${game.level} 关 · 坚持到了 ${player.level} 级`;
   }
   document.getElementById('rTime').textContent=fmtTime(game.levelTime);
-  document.getElementById('rLevel').textContent=player.level;
+  document.getElementById('rLevel').textContent=player.level+' / '+CFG.LEVEL.playerMax;
   document.getElementById('rKills').textContent=game.levelKills;
-  document.getElementById('rXp').textContent=game.totalXp;
+  // 最终构筑：武器 + 被动清单（带等级），让每局的养成结果可见
+  const build=[];
+  for(const k in player.weapons) build.push(WEAPONS[k].icon+WEAPONS[k].name+' '+player.weapons[k].level);
+  for(const k in player.passives) if(player.passives[k]>0) build.push(PASSIVES[k].icon+PASSIVES[k].name+' '+player.passives[k]);
+  const rb=document.getElementById('rBuild'); if(rb) rb.textContent=build.length?build.join('  '):'—';
   // 按钮：失败=重试；过关=下一关；通关=再玩一次
   const again=document.getElementById('againBtn');
   const next=document.getElementById('nextBtn');

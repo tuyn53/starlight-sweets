@@ -4,11 +4,92 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#bdeaff">
-<title>星光保卫战 · Starlight Sweets</title>
+<title>甜星大作战 · SWEET STAR BLITZ</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <canvas id="game"></canvas>
+
+<!-- 加载首屏：与首页共用同一片糖果世界，主角做主体，进度=星光汇聚 -->
+<div id="loading" role="status" aria-live="polite" aria-label="游戏资源加载中">
+  <div class="home-world load-world" aria-hidden="true">
+    <div class="sun-glow"></div>
+    <div class="cloud cloud-a"><i></i><i></i><i></i></div>
+    <div class="cloud cloud-b"><i></i><i></i><i></i></div>
+    <div class="cloud cloud-c"><i></i><i></i><i></i></div>
+    <div class="home-stars">
+      <i style="--x:10%;--y:18%;--d:0s;--s:1"></i><i style="--x:26%;--y:9%;--d:.7s;--s:.7"></i>
+      <i style="--x:58%;--y:14%;--d:1.4s;--s:.9"></i><i style="--x:82%;--y:22%;--d:.3s;--s:1.1"></i>
+      <i style="--x:90%;--y:40%;--d:1s;--s:.8"></i><i style="--x:14%;--y:52%;--d:1.5s;--s:.75"></i>
+    </div>
+    <div class="hill hill-back"></div>
+    <div class="hill hill-front"></div>
+    <div class="flower-field"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="load-burst" aria-hidden="true"></div>
+  <div class="load-core">
+    <!-- 品牌 LOGO：纯 SVG 内联绘制，不依赖任何网络图片，加载首帧即成形，永不穿帮 -->
+    <div class="load-logo" aria-hidden="true">
+      <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="lgHalo" cx="50%" cy="50%" r="52%">
+            <stop offset="0" stop-color="#fff0bd" stop-opacity=".9"/>
+            <stop offset=".55" stop-color="#ffd9ea" stop-opacity=".5"/>
+            <stop offset="1" stop-color="#ffd9ea" stop-opacity="0"/>
+          </radialGradient>
+          <!-- 主星：近白 → 草莓粉，与标题粉色同一色系 -->
+          <linearGradient id="lgStar" x1="0" y1="0" x2=".2" y2="1">
+            <stop offset="0" stop-color="#ffe0f0"/>
+            <stop offset=".42" stop-color="#ffb6db"/>
+            <stop offset="1" stop-color="#ff8fc0"/>
+          </linearGradient>
+          <!-- 中心星：白 → 浅蓝，呼应标题「大作战」的蓝 -->
+          <linearGradient id="lgCore" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff"/>
+            <stop offset="1" stop-color="#d8e8ff"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 光晕：柔和粉黄，只做氛围，不抢主体 -->
+        <circle class="logo-halo" cx="80" cy="80" r="74" fill="url(#lgHalo)"/>
+
+        <!-- 主星：尖角四角星 + 白色圆角描边（与标题文字同一手法），腰收细才有"闪光"锐度 -->
+        <path d="M80 22 L98 62 L138 80 L98 98 L80 138 L62 98 L22 80 L62 62 Z"
+              fill="url(#lgStar)" stroke="#ffffff" stroke-width="8"
+              stroke-linejoin="round" paint-order="stroke"/>
+
+        <!-- 中心星：缩小到主星约三分之一，保证粉色主体不被掏空 -->
+        <path d="M80 60 L87 73 L100 80 L87 87 L80 100 L73 87 L60 80 L73 73 Z"
+              fill="url(#lgCore)" stroke="#ffffff" stroke-width="4"
+              stroke-linejoin="round" paint-order="stroke"/>
+
+        <!-- 糖粒：对角分布，暗示"甜"，不参与主体构图 -->
+        <circle cx="44" cy="48" r="3.6" fill="#ffd166"/>
+        <circle cx="118" cy="106" r="3.2" fill="#a9c4ff"/>
+        <circle cx="126" cy="52" r="2.8" fill="#ffb3d0"/>
+      </svg>
+    </div>
+    <!-- 标题用 SVG 文字：stroke + paint-order:stroke 描边在填充下层，绝不侵蚀字形（text-shadow 描边会糊死笔画） -->
+    <svg class="load-title" viewBox="0 0 380 86" role="img" aria-label="甜星大作战">
+      <text x="190" y="64" text-anchor="middle">
+        <tspan class="lt-pink">甜星</tspan><tspan class="lt-blue">大作战</tspan>
+      </text>
+    </svg>
+    <div class="load-track"><i id="loadFill"></i></div>
+    <p class="load-status">
+      <span id="loadSub">正在收集星光…</span>
+      <i class="load-dot" aria-hidden="true"></i>
+      <b id="loadPct">0%</b>
+    </p>
+    <button id="loadStart" class="load-start hidden" type="button">
+      <!-- 同样用 SVG 文字：HTML 文本的 -webkit-text-stroke 不支持 paint-order，会在小字号上糊死笔画 -->
+      <svg class="ls-svg" viewBox="0 0 300 42" role="img" aria-label="轻触屏幕，开始冒险">
+        <text x="150" y="31" text-anchor="middle">轻触屏幕 · 开始冒险</text>
+      </svg>
+      <i class="ls-arrow" aria-hidden="true"></i>
+    </button>
+  </div>
+</div>
 
 <!-- 左上角全局设置入口：Q 版齿轮，点击弹出设置浮窗（音效/震屏/闪光） -->
 <button id="settingsBtn" class="icon-btn" type="button" aria-label="打开设置" aria-haspopup="dialog" aria-controls="settingsPanel" aria-expanded="false">
@@ -125,16 +206,16 @@
     </div>
     <div class="hill hill-back"></div>
     <div class="hill hill-front"></div>
-    <div class="flower-field"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="flower-field"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   </div>
 
   <main class="home-shell">
     <section class="home-copy" aria-labelledby="gameTitle">
-      <div class="eyebrow"><i></i> STARLIGHT GUARD <i></i></div>
+      <div class="eyebrow"><i></i> SWEET STAR BLITZ <i></i></div>
       <div class="title-wrap">
         <span class="title-spark" aria-hidden="true">✦</span>
-        <h1 id="gameTitle"><span class="title-pink">星光</span><span class="title-blue">保卫战</span></h1>
-        <span class="title-ribbon">和伙伴一起，守护闪闪发光的世界</span>
+        <h1 id="gameTitle"><span class="title-pink">甜星</span><span class="title-blue">大作战</span></h1>
+        <span class="title-ribbon">和伙伴一起，奔向闪闪发光的世界</span>
       </div>
       <p class="home-tagline">收集星星，结识甜点伙伴<br>开启一场软乎乎的魔法冒险</p>
       <button class="btn home-play" id="startBtn" aria-label="开始冒险，选择关卡">
@@ -151,7 +232,7 @@
     </section>
 
     <section class="hero-area" aria-label="主角和星灵伙伴">
-      <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="speech-bubble"><span>今天也要</span><strong>闪闪发光！</strong></div>
       <div class="hero-character"><canvas class="rig-canvas" data-kind="player" data-pose="cheer" aria-label="星光小法师"></canvas></div>
       <div class="companion companion-left">
@@ -173,9 +254,12 @@
   </div>
 </div>
 
+<!-- 全局转场：几朵白云从四角涌来合拢填满，切换后再散开。
+     云来自首页的同一个世界（云/天空/草地），配色沿用画面本身的蓝白，不另起一套。 -->
 <div id="sceneTransition" class="hidden" aria-hidden="true">
-  <div class="transition-burst"></div><img class="transition-star" src="assets/starlight-shard.svg" alt="">
-  <span>星光出发</span>
+  <div class="cloud-base"></div>
+</div>
+</div>
 </div>
 
 <div id="levels" class="screen hidden">
@@ -198,8 +282,8 @@
     <div>用时 <b id="rTime">00:00</b></div>
     <div>达到等级 <b id="rLevel">1</b></div>
     <div>击退数 <b id="rKills">0</b></div>
-    <div>拾取星星 <b id="rXp">0</b></div>
   </div>
+  <div class="result-build"><span>最终构筑</span><b id="rBuild">—</b></div>
   <div class="result-btns">
     <button class="btn" id="nextBtn">下一关 ➜</button>
     <button class="btn ghost" id="againBtn">重试本关</button>

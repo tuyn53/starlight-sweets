@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>甜星大作战 · 帧时间探针</title>
+<style>
+  body{margin:0;background:#1a1a1f;color:#e8e8ef;font:14px/1.6 -apple-system,sans-serif;padding:16px;}
+  h1{font-size:16px;margin:0 0 8px;} p{color:#a0a0b0;margin:0 0 16px;font-size:12px;}
+  button{background:#3a7bd5;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:14px;margin:0 6px 12px 0;}
+  #out{white-space:pre-wrap;font:12px/1.5 ui-monospace,monospace;background:#23232b;padding:12px;border-radius:8px;min-height:120px;}
+  .good{color:#5ddba0}.warn{color:#ffc063}.bad{color:#ff6b7a}
+</style></head><body>
+<h1>Canvas 帧时间探针</h1>
+<p>在你要测的手机浏览器里打开本页，点「开始」。它模拟满屏 80 只怪 + 60 个经验球的绘制负载，测每帧耗时。<br>16.7ms=60fps 上限，33ms=30fps。测完把结果截图发我。</p>
+<button id="run">开始测量</button><button id="runLite">轻量模式(40怪/20球)</button>
+<div id="out">等待测量…</div>
+<canvas id="c" style="display:none"></canvas>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d'),out=document.getElementById('out');
+const dpr=Math.min(window.devicePixelRatio||1,2);
+function sprite(s,col){const x=document.createElement('canvas');x.width=x.height=s;const g=x.getContext('2d');g.fillStyle=col;g.beginPath();g.arc(s/2,s/2,s/2,0,7);g.fill();return x;}
+const body=sprite(512,'#8fe3a8'),parts=[0,1,2,3].map(()=>sprite(120,'#ff8fc7'));
+function bench(nEnemies,nGems,sliced){
+  const w=window.innerWidth,h=window.innerHeight;
+  c.width=Math.floor(w*dpr);c.height=Math.floor(h*dpr);
+  c.style.width=w+'px';c.style.height=h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const es=[],gs=[];
+  for(let i=0;i<nEnemies;i++)es.push({x:Math.random()*w,y:Math.random()*h,a:Math.random()*7});
+  for(let i=0;i<nGems;i++)gs.push({x:Math.random()*w,y:Math.random()*h});
+  const N=180,ts=[];
+  for(let f=0;f<N;f++){
+    const t0=performance.now();
+    ctx.clearRect(0,0,w,h);
+    // 敌人：模拟纸娃娃(5 drawImage+变换) 或 单 drawImage
+    for(const e of es){
+      const ox=e.x-22,oy=e.y-44;
+      if(sliced){
+        ctx.save();
+        for(let k=0;k<4;k++){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.a+f*0.01+k);ctx.translate(-e.x,-e.y);ctx.drawImage(parts[k],ox+8*k,oy+20,28,26);ctx.restore();}
+        ctx.drawImage(body,ox,oy,44,44);ctx.restore();
+      }else ctx.drawImage(body,ox,oy,44,44);
+    }
+    // 经验球：模拟每帧 createRadialGradient + 2 star
+    for(const g of gs){
+      ctx.save();ctx.translate(g.x,g.y);
+      const grad=ctx.createRadialGradient(0,0,1,0,0,17);
+      grad.addColorStop(0,'rgba(110,225,255,.5)');grad.addColorStop(1,'rgba(110,225,255,0)');
+      ctx.fillStyle=grad;ctx.beginPath();ctx.arc(0,0,17,0,7);ctx.fill();
+      ctx.fillStyle='#5ad6ff';
+      for(let s=0;s<2;s++){ctx.beginPath();for(let k=0;k<8;k++){const a=k/8*6.283,r=k%2?3:9;const px=Math.cos(a)*r,py=Math.sin(a)*r;k?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.fill();}
+      ctx.restore();
+    }
+    ts.push(performance.now()-t0);
+  }
+  ts.sort((a,b)=>a-b);
+  const avg=ts.reduce((a,b)=>a+b,0)/N;
+  return {avg:avg.toFixed(2),p50:ts[Math.floor(N*.5)].toFixed(2),p95:ts[Math.floor(N*.95)].toFixed(2),max:ts[N-1].toFixed(2)};
+}
+function cls(ms){return ms<=16.7?'good':ms<=33?'warn':'bad';}
+function report(){
+  const w=window.innerWidth+'x'+window.innerHeight, d=window.devicePixelRatio;
+  const rows=[
+    ['满屏 80怪+60球 纸娃娃',bench(80,60,true)],
+    ['满屏 80怪+60球 单图',bench(80,60,false)],
+    ['中载 40怪+20球 纸娃娃',bench(40,20,true)],
+  ];
+  let s='屏幕 '+w+' · DPR '+d+'(渲染用'+dpr+')\n\n';
+  for(const [name,r] of rows){
+    s+=name+'\n';
+    s+='  平均 '+r.avg+'ms <span class="'+cls(r.avg)+'">'+r.avg+'</span> · p95 '+r.p95+'ms · 最大 '+r.max+'ms\n';
+  }
+  s+='\n判读：平均<16.7ms 满帧；16.7-33ms 掉到30-60之间；>33ms 明显卡。\n';
+  s+='若「纸娃娃」明显比「单图」慢 → 骨骼绘制是瓶颈；两者都慢 → 填充率/渐变是瓶颈。';
+  out.innerHTML=s.replace(/\n/g,'<br>');
+}
+document.getElementById('run').onclick=()=>{out.textContent='测量中（约3秒）…';setTimeout(report,50);};
+document.getElementById('runLite').onclick=()=>{
+  out.textContent='测量中…';setTimeout(()=>{
+    const w=window.innerWidth+'x'+window.innerHeight;
+    const r=bench(40,20,true);
+    out.innerHTML='屏幕 '+w+' · DPR '+window.devicePixelRatio+'\n\n中载 40怪+20球：平均 '+r.avg+'ms · p95 '+r.p95+'ms · 最大 '+r.max+'ms';
+  },50);
+};
+</script></body></html>

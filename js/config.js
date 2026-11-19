@@ -1,5 +1,5 @@
 /* ================================================================
- * 星光保卫战 Starlight Sweets — 关卡制 Q 版可爱幸存者 H5
+ * 甜星大作战 SWEET STAR BLITZ — 关卡制 Q 版可爱幸存者 H5
  * 结构：CONFIG → 关卡/场景数据 → 数据表 → 世界 → 系统 → 渲染 → 主循环
  * 风格：明亮糖果色 / Q版卡通 / 魔法少女星光
  * ================================================================ */
@@ -7,7 +7,7 @@
 // === CONFIG === 可调参数集中区（改这里就能调玩法）
 const CFG = {
   STEP: 1 / 60,          // 物理固定步长
-  MAX_ENEMIES: 220,      // 敌人上限（性能保护）
+  MAX_ENEMIES: 120,      // 敌人上限（维持屏幕数量模型 + 移动端性能保护）
   MAX_PARTICLES: 280,
   USE_SLICE: true,       // 纸娃娃切片骨骼：用原 PNG 像素切出四肢旋转，画风不变但手脚能动
   USE_RIG: false,        // 备用：程序化简笔骨骼（已弃用，视觉降级；仅在无精灵图时回退）
@@ -15,8 +15,10 @@ const CFG = {
     hp: 100, speed: 195, pickup: 62, armor: 0,
     damage: 1, fireRate: 1, cooldown: 1, crit: 0, regen: 0,
   },
-  SPAWN: { start: 0.85, min: 0.17, decay: 0.987 }, // 刷怪间隔（随关卡再收紧）
-  XP_BASE: 5, XP_GROW: 1.15,   // 关内经验曲线
+  // 刷怪：维持屏幕数量模型（替代旧的"间隔指数收紧"）
+  // target = 目标存活数，随玩家等级线性抬升；每秒最多补 refill 只，避免后期刷屏
+  SPAWN: { targetBase: 22, targetPerLv: 3, targetCap: 80, refillPerSec: 6 },
+  XP_BASE: 5, XP_GROW: 1.18,   // 关内经验曲线（单局击杀量增大后调陡）
 
   // === 自动攻击：射程门控 + 分层优先级 ===
   // range：武器射程（像素半径）。敌人进入射程才会被自动锁定攻击，出场瞬间不会隔屏开火。
@@ -33,15 +35,19 @@ const CFG = {
   // 随机刷新的可破坏资源物（星星水晶）：打碎掉经验 + 少量回血
   PROP: { interval: 11, hp: 42, r: 13, healPct: 4, gems: 2 },
 
-  // === 关卡系统 ===
+  // === 关卡系统（每关 = 一次完整的 Lv1→Lv20 单局）===
   LEVEL: {
     total: 20,
     perAct: 5,            // 每 5 关一幕、每 5 关一个主题 Boss
-    bossEvery: 5,         // 第 5/10/15/20 关是 Boss 关
-    timeBase: 30, timeStep: 1.6,   // 普通关存活目标 = timeBase + level*timeStep 秒
-    killBase: 18, killStep: 2,     // 普通关击杀目标 = killBase + level*killStep 只
-    diffStep: 0.16,       // 每关敌人强度递增系数
-    bossDelay: 2.2,       // Boss 关开场几秒后 Boss 降临
+    bossEvery: 5,         // 第 5/10/15/20 关是主题 Boss 关
+    playerMax: 20,        // 关内等级上限；满级触发关底战
+    diffStep: 0.15,       // 敌人强度：关卡号主导
+    diffTime: 0.004,      // 关内时间微弱加成（旧值 0.011 在 10 分钟时 +6.6 倍，压死构筑）
+    diffLv: 0.030,        // 玩家等级对敌人强度的联动
+    // 关底血量：主题 Boss base+step×关（L20≈15000）；守卫 base+step×关（L20≈6800）
+    bossHpBase: 5000, bossHpStep: 500,
+    guardHpBase: 2400, guardHpStep: 220,
+    bossSequence: 3.0,    // 满级→清场演出→Boss 降临的时长（秒）
   },
 
   // === 4 幕场景（1-5 / 6-10 / 11-15 / 16-20）===
@@ -143,11 +149,45 @@ const ETYPE = {
 };
 const NORMAL_TYPES = ['spore','swift','split','mimic','thief','bomber'];
 
-// === 工具函数：由关卡号推导场景/主题 Boss ===
+// === 逐关怪池表（关卡循环用，语义 = "本关可用怪池"，非"本关刷几只"）===
+// 当前用现有 6 种普通怪实现递进；内容扩展阶段在对应关的 pool 里插入新怪 key 即可，
+// 新怪：糖粒swarm(6)/麦芽goo(7)/泡泡bubble(11)/云绵cloud(12)/镜影mirror(16)/雪宝ice(17)，
+//       精英变体千层(13)/冻皇(18) 走 elite 换机制。
+// density：维持数量模型的目标数系数（Boss 关小怪减半 0.6；回忆关峰值 1.2）。
+const UNLOCK_TABLE = [
+  { pool:['spore','swift','split'],                          density:1.0 }, // L1 教学 3 种
+  { pool:['spore','swift','split','thief'],                  density:1.0 }, // L2 +焦糖
+  { pool:['spore','swift','split','thief','mimic'],          density:1.0 }, // L3 +果冻
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L4 +爆米
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:0.6 }, // L5 莓莓
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L6 (+糖粒)
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L7 (+麦芽)
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L8 +精英常驻
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.2 }, // L9 峰值
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:0.6 }, // L10 抹茶
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L11 (+泡泡)
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L12 (+云绵)
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L13 精英千层
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.2 }, // L14 峰值
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:0.6 }, // L15 云朵
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L16 (+镜影)
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L17 (+雪宝)
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.0 }, // L18 精英冻皇
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:1.2 }, // L19 峰值
+  { pool:['spore','swift','split','thief','mimic','bomber'], density:0.6 }, // L20 黑森林
+];
+
+// === 工具函数：由关卡号推导场景/主题 Boss/关底守卫 ===
 function actOf(level){ return CFG.ACTS[clamp(Math.floor((level-1)/CFG.LEVEL.perAct),0,CFG.ACTS.length-1)]; }
 function bossInfo(level){ return CFG.BOSSES[level] || CFG.BOSSES[20]; }
 function isBossLevel(level){ return level % CFG.LEVEL.bossEvery === 0; }
-function levelTargets(level){
-  const L=CFG.LEVEL;
-  return { time: L.timeBase + level*L.timeStep, kills: L.killBase + level*L.killStep };
+// 关底守卫：复用当幕 Boss 精灵 + 按幕 hue 染色 + "守卫"前缀，两阶段、无激光
+// title·name 拼出来是"关底守卫·莓莓"，与主题 Boss"草莓大福·莓莓"格式一致
+const GUARD_HUES = [18, 96, -128, -58];
+function guardInfo(level){
+  const idx=clamp(Math.floor((level-1)/CFG.LEVEL.perAct),0,3);
+  const themeBoss=CFG.BOSSES[(idx+1)*CFG.LEVEL.bossEvery]; // 幕末主题 Boss = 该幕守卫的原型
+  return { name:themeBoss.name, title:'关底守卫', color:themeBoss.color,
+           hue:GUARD_HUES[idx], guard:true };
 }
+function levelRoster(level){ return UNLOCK_TABLE[clamp(level-1,0,UNLOCK_TABLE.length-1)]; }

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 150" width="260" height="150">
+  <defs>
+    <linearGradient id="cg" x1="0" y1="20" x2="0" y2="138" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".42" stop-color="#fdfeff"/>
+      <stop offset=".74" stop-color="#e9f4ff"/>
+      <stop offset="1" stop-color="#cfe6fc"/>
+    </linearGradient>
+  </defs>
+  <!-- 平底 -->
+  <rect x="20" y="106" width="220" height="28" rx="14" fill="url(#cg)"/>
+  <!-- 四团起伏分明的圆弧（顶端高低差约 50px） -->
+  <circle cx="56"  cy="98" r="34" fill="url(#cg)"/>
+  <circle cx="106" cy="70" r="48" fill="url(#cg)"/>
+  <circle cx="162" cy="80" r="42" fill="url(#cg)"/>
+  <circle cx="214" cy="102" r="30" fill="url(#cg)"/>
+  <!-- 下缘背光 -->
+  <path d="M44 130 Q130 142 218 126 Q130 136 44 130 Z" fill="#c2defa" opacity=".6"/>
+</svg>

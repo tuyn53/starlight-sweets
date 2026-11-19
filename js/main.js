@@ -15,6 +15,9 @@ function frame(now){
   } else if(Juice.stop>0){ /* hit-stop：冻结世界推进，仍渲染打击帧 */ }
   else acc=0;
   render(game.state==='playing'?clamp(acc/CFG.STEP,0,1):0);
+  // 首页骨骼动画并入同一 rAF：仅在菜单可见且加载层已收场时绘制，
+  // 加载阶段不白画（被加载层遮住），也不读 DOM 布局属性（避免强制重排）。
+  if(homeRigs.length && VIS.menu && loadLayer.classList.contains('done')) drawHome(now);
   requestAnimationFrame(frame);
 }
 
@@ -29,17 +32,66 @@ function refreshMenuProgress(){
   if(strong) strong.textContent=game.unlocked>1?'继续冒险':'开始冒险';
   if(small) small.textContent=game.unlocked>1?`第 ${game.unlocked} 关正在闪闪发光`:'星光之旅等着你';
 }
+
+// 8 朵卡通云：左边 4 朵只从左侧进/出，右边 4 朵只从右侧进/出，位置与方向严格对应。
+// （竖屏下 8 朵无法无缝铺满，缝隙由浅色天空底兜住，视觉上仍是"整片天+云"）
+(function seedWipeClouds(){
+  const host=document.getElementById('sceneTransition');
+  if(!host || host.querySelector('.wc')) return;
+  // 云用 SVG 矢量绘制（cloud-a/b，参考图同款造型），4 排 2 列交错：左列自左进、右列自右进，
+  // 中间交叉叠压；退场沿各自方向继续横穿出去。
+  const POS=[
+    {l:-11,t:-9, s:1.14,dir:-1},
+    {l:-15,t:15, s:1.04,dir:-1},
+    {l:-12,t:42, s:1.10,dir:-1},
+    {l:-16,t:69, s:1.02,dir:-1},
+    {l:37, t:-5, s:1.08,dir: 1},
+    {l:41, t:19, s:1.18,dir: 1},
+    {l:38, t:46, s:1.05,dir: 1},
+    {l:42, t:72, s:1.12,dir: 1},
+  ];
+  const frag=document.createDocumentFragment();
+  POS.forEach((p,i)=>{
+    const el=document.createElement('div');
+    el.className='wc';
+    el.style.left=p.l+'%';
+    el.style.top =p.t+'%';
+    el.style.backgroundImage='url("assets/clouds/cloud-'+(i%2?'a':'b')+'.svg")';
+    el.style.setProperty('--fx',  (p.dir<0?-125:125)+'vw');
+    el.style.setProperty('--outx',(p.dir<0?-135:135)+'vw');  // 与 --fx 同号：原路返回
+    el.style.setProperty('--outd',(i*0.02).toFixed(3)+'s');
+    el.style.setProperty('--fs',p.s.toFixed(2));
+    el.style.animationDelay=(i*0.03).toFixed(3)+'s';
+    frag.appendChild(el);
+  });
+    host.appendChild(frag);
+})();
+// 全局转场：白云从四角涌来合拢填满 → 满铺时切界面 → 云散开露出新界面。
+// 云是 SVG 矢量椭圆，放大不糊；全程只有"云在聚拢"一件事，不旋转不闪烁。
+const WIPE_IN=700, WIPE_OUT=780;
+function cloudWipe(swap, origin, onDone){
+  const layer=document.getElementById('sceneTransition');
+  if(!layer){ swap(); if(onDone) onDone(); return; }
+  layer.classList.remove('hidden','on','out');
+  layer.style.opacity='';                       // 清掉上一次散开残留
+  void layer.offsetWidth;                       // 强制回流，让云朵动画从头开始
+  layer.classList.add('on');
+  setTimeout(()=>{
+    try{ swap(); }catch(e){ console.error('[wipe]',e); }
+    layer.classList.remove('on');
+    layer.classList.add('out');                 // 满铺后化开
+  }, WIPE_IN);
+  setTimeout(()=>{
+    layer.classList.add('hidden');
+    layer.classList.remove('out');
+    if(onDone) onDone();
+  }, WIPE_IN+WIPE_OUT+40);
+}
 function transitionTo(action){
   if(sceneBusy) return;
   if(prefersReducedMotion()){ action(); return; }
-  const layer=document.getElementById('sceneTransition');
   sceneBusy=true;
-  layer.classList.remove('hidden');
-  void layer.offsetWidth;
-  layer.classList.add('active');
-  setTimeout(action,240);
-  setTimeout(()=>layer.classList.remove('active'),480);
-  setTimeout(()=>{ layer.classList.add('hidden'); sceneBusy=false; },720);
+  cloudWipe(action, null, ()=>{ sceneBusy=false; });
 }
 function buildLevelGrid(){
   const grid=document.getElementById('levelGrid'); grid.innerHTML='';
@@ -185,13 +237,85 @@ document.getElementById('pauseRestart').addEventListener('click', () => {
 document.getElementById('pauseQuit').addEventListener('click', quitToLevels);
 Input.init();
 
-// 菜单背景也渲染一帧，避免黑屏
+// 启动：先显示加载首屏，精灵图（含失败回退）全部就绪后再淡出进入首页。
+// 本地服务器加载很快，一闪而过；部署到远端后这里就是真实的等待态，避免半成品精灵/画风降级。
 loadProgress();
 refreshMenuProgress();
 player=makePlayer();
 game.cam.x=-VIEW.w/2; game.cam.y=-VIEW.h/2;
-loadSprites();
-requestAnimationFrame(frame);
+
+const loadLayer  = document.getElementById('loading');
+const loadFill   = document.getElementById('loadFill');
+const loadPct    = document.getElementById('loadPct');
+const loadSub    = document.getElementById('loadSub');   // 只改文字节点，保留两侧装饰横线
+const loadStart  = document.getElementById('loadStart');
+let entered=false;   // 入场只触发一次
+
+// 加载文案池：按进度分四段，进入新阶段时随机换一句，避免从头到尾一句"正在收集星光"
+const LOAD_TIPS = [
+  ['正在收集星光…','小星星们排好队啦…','星星正在赶来的路上…'],
+  ['甜点伙伴正在醒来…','正在撒糖霜…','棉花糖云朵铺好啦…'],
+  ['魔法锅在咕嘟咕嘟…','把星星装进口袋…','云朵正在变得软乎乎…'],
+  ['马上就好啦…','最后一点点…','星光快要满啦…'],
+];
+let loadStage = -1;
+function tipFor(pct){
+  const stage = pct<28?0 : pct<56?1 : pct<84?2 : 3;
+  if(stage!==loadStage){
+    loadStage = stage;
+    const pool = LOAD_TIPS[stage];
+    if(loadSub) loadSub.textContent = pool[Math.floor(Math.random()*pool.length)];
+  }
+}
+
+function finishLoading(){
+  if(loadFill) loadFill.style.width='100%';
+  if(loadPct) loadPct.textContent='100%';
+  if(loadSub) loadSub.textContent='星光已就位！';
+  // 就绪态：进度条让位给"轻触开始"，等玩家点击（这一下同时解锁音频）
+  if(loadStart) loadStart.classList.remove('hidden');
+  loadLayer.classList.add('ready');
+}
+function enterGame(){
+  if(entered || !loadLayer.classList.contains('ready')) return;  // 未就绪或已入场时忽略
+  entered=true;
+  loadLayer.classList.remove('ready');
+  const menu = document.getElementById('menu');
+
+  // 减少动效：直接切，不做动画
+  if(prefersReducedMotion()){
+    loadLayer.classList.add('done'); loadLayer.style.display='none';
+    if(menu) menu.classList.add('home-enter');
+    return;
+  }
+
+  // 软块从 LOGO 的真实位置弹开（读实际几何，不用百分比猜，避免"位置跳一下"）
+  let origin=null;
+  const logo=document.querySelector('.load-logo');
+  if(logo){
+    const r=logo.getBoundingClientRect();
+    origin={ x:r.left+r.width/2, y:r.top+r.height/2 };
+  }
+
+  cloudWipe(()=>{
+    loadLayer.classList.add('done');
+    loadLayer.style.display='none';              // 满铺时切换，绝不会两界面叠影
+    if(menu) menu.classList.add('home-enter');   // 首页从 1.04 落入原位
+  }, origin);
+}
+// 整屏与按钮都可点；按钮点击会冒泡到 loadLayer，用 entered 去重
+if(loadLayer) loadLayer.addEventListener('click', enterGame);
+
+loadSprites(
+  finishLoading,
+  (done, total, ok, key)=>{
+    const pct=Math.round(done/total*100);
+    if(loadFill) loadFill.style.width=pct+'%';
+    if(loadPct) loadPct.textContent=pct+'%';
+    tipFor(pct);
+  }
+);
+requestAnimationFrame(frame);   // 主循环从启动就跑（加载页主角动画 + 菜单背景）
 
 // === 大厅骨骼动画：首页主角挥手 + 伙伴待机（canvas 逐帧绘制）===
 const homeRigs = Array.prototype.map.call(document.querySelectorAll('.rig-canvas'), cv => {
@@ -203,27 +327,26 @@ const homeRigs = Array.prototype.map.call(document.querySelectorAll('.rig-canvas
     }
     return dpr;
   };
-  return { cv, ctx: cv.getContext('2d'), kind: cv.dataset.kind, pose: cv.dataset.pose, phase: Math.random()*3, fit };
+  return { cv, ctx: cv.getContext('2d'), kind: cv.dataset.kind, pose: cv.dataset.pose,
+           phase: Math.random()*3, fit };
 });
-function homeFrame(now){
+// 由主循环的单一 rAF 调用（见 frame），不再自启 rAF。
+// 每个 rig 用各自的局部 ctx，Rig.draw 的 o.ctx 只临时切换、draw 结束立即交还主 ctx，
+// 不再每帧做 getElementById + getContext 查询（原实现的强制 DOM 访问 + 全局 ctx 争抢）。
+function drawHome(now){
   const T = now/1000;
   for (const r of homeRigs) {
-    if (!r.cv.offsetParent) continue;               // 首页隐藏时跳过绘制
     const dpr = r.fit();
     const w = r.cv.width, h = r.cv.height;
     r.ctx.setTransform(1,0,0,1,0,0);
     r.ctx.clearRect(0,0,w,h);
     r.ctx.setTransform(dpr,0,0,dpr,0,0);
     const pose = Rig.sample(r.pose, T, r.phase);
-    // 按容器高度定尺寸，脚底贴容器底部 ~96%，整体高度留 8% 边距防头饰溢出
     const cw=w/dpr, ch=h/dpr;
     const drawH = ch * 0.94;
-    // 优先用原 PNG 切片骨骼（画风不变、手脚能动）；精灵未加载好则退回程序化骨骼
     if(!SliceRig.draw(r.kind, cw/2, ch*0.97, drawH, pose, { ctx:r.ctx })){
       Rig.draw(r.kind, cw/2, ch*0.97, drawH, pose, { ctx:r.ctx, T });
     }
   }
-  Rig.setCtx(document.getElementById('game').getContext('2d'));  // 交还上下文给游戏主循环
-  requestAnimationFrame(homeFrame);
+  Rig.setCtx(ctx);  // 交还主画布上下文（用 core.js 已缓存的 ctx，不再每帧查询 DOM）
 }
-if (homeRigs.length) requestAnimationFrame(homeFrame);

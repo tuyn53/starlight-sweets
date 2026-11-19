@@ -1,10 +1,10 @@
-# 星光保卫战 · Starlight Sweets
+# 甜星大作战 · SWEET STAR BLITZ
 
 一款 Q 版可爱风的类吸血鬼幸存者 H5 小游戏。原生 Canvas 2D + Web Audio，**零依赖、零构建**，用浏览器打开就能玩。
 
 ![no dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
 ![no build](https://img.shields.io/badge/build-none-blue)
-![tests](https://img.shields.io/badge/smoke%20tests-49%20passed-brightgreen)
+![tests](https://img.shields.io/badge/smoke%20tests-71%20passed-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
 <!-- TODO: 放游戏截图。建议 1280×800 存到 docs/screenshots/hero.png，再启用下面这行
@@ -16,7 +16,7 @@
 - **移动**：键盘 `WASD` / 方向键，或触屏虚拟摇杆
 - **攻击**：全自动，专心走位和吃星星
 - **升级**：拾取星光经验升级，三选一抽卡（键盘 `1` `2` `3` 或点击）
-- **目标**：20 关逐关闯，4 幕场景（阳光草地 / 糖果森林 / 云端天空 / 星光城堡），每 5 关一位甜点主题 Boss
+- **目标**：20 关逐关闯，每关从 Lv1 练到 Lv20 满级 → 击杀关底过关。4 幕场景（阳光草地 / 糖果森林 / 云端天空 / 星光城堡），5/10/15/20 是甜点主题 Boss（三阶段），其余关是两阶段关底守卫；第 1 关与第 20 关起手完全一致，关卡间不继承数值
 - **设置**：左上角齿轮 → 音乐 / 音效 / 震屏强度 / 闪光强度（`Esc` 关闭）
 
 进度存在浏览器 `localStorage`（key：`starlight_guard_progress`）。调试时在控制台执行：
@@ -27,7 +27,7 @@ localStorage.setItem('starlight_guard_progress', '20') // 解锁全部 20 关
 
 ## 特性
 
-- **20 关 + 4 幕场景**：草地 / 森林 / 天空 / 城堡，每幕独立配色与装饰
+- **20 关 + 4 幕场景**：草地 / 森林 / 天空 / 城堡，每幕独立配色与装饰；每关一次完整 Lv1→Lv20 单局，满级触发关底战
 - **8 种原创甜系怪物**：每位一个独特机制（毒云、突进、分裂、隐身、偷经验、自爆、召唤、Boss 三阶段）
 - **5 把星光武器 + 9 种被动**：各满 5 级，升级三选一，精英掉宝箱额外抽卡
 - **纸娃娃切片骨骼**：不重绘角色，直接把 AI 精绘 PNG 切成躯干 + 四肢绕关节旋转，画风不降级但手脚真的会动
@@ -73,7 +73,7 @@ npx serve .                     # Node
 ├── scripts/
 │   ├── make_sprite.py         # 精灵归一化：去背 / 去水印 / 裁切 / 缩放（纯标准库）
 │   ├── preview_scale.py       # 游戏实际尺寸验收
-│   └── smoke_test.js          # 逻辑回归测试（49 项）
+│   └── smoke_test.js          # 逻辑回归测试（71 项）
 ├── docs/                      # 设计文档（见下方文档索引）
 ├── 部署说明.md                 # nginx 部署与踩坑
 └── LICENSE
@@ -91,7 +91,7 @@ config → core → music → rig → sprites → slicerig → logic → render 
 # 1. 语法检查
 for f in js/*.js; do node --check "$f" || exit 1; done
 
-# 2. 逻辑回归（当前 49 项全过）
+# 2. 逻辑回归（当前 71 项全过）
 node scripts/smoke_test.js
 
 # 3. 实机验收
@@ -106,12 +106,14 @@ python3 -m http.server 8080
 
 | 想改什么 | 改哪里 |
 |---|---|
-| 关卡数量、每幕关数、Boss 间隔 | `CFG.LEVEL`（`total` / `perAct` / `bossEvery`） |
-| 刷怪密度 | `CFG.SPAWN`（`start` / `min` / `decay`） |
-| 升级经验曲线 | `CFG.XP_BASE` / `CFG.XP_GROW` |
+| 关卡数量、每幕关数、主题 Boss 间隔 | `CFG.LEVEL`（`total` / `perAct` / `bossEvery`） |
+| 满级目标、关底血量、演出时长、敌人成长 | `CFG.LEVEL`（`playerMax` / `bossHp*` / `guardHp*` / `bossSequence` / `diff*`） |
+| 刷怪密度（目标存活数 / 补怪速率） | `CFG.SPAWN`（`targetBase/targetPerLv/targetCap` / `refillPerSec`）+ `UNLOCK_TABLE` 的 `density` |
+| 每关可用怪池 | `UNLOCK_TABLE`（`pool` 为该关可用池，关内按时间分波次） |
+| 升级经验曲线 | `CFG.XP_BASE` / `CFG.XP_GROW`（满级总需经验 ≈800） |
 | 武器与被动 | `WEAPONS` / `PASSIVES` |
 | 怪物属性与机制 | `ETYPE`（`mech` 字段驱动行为） |
-| 4 幕场景与主题 Boss | `CFG.ACTS` / `CFG.BOSSES` |
+| 4 幕场景与主题 Boss | `CFG.ACTS` / `CFG.BOSSES` / `guardInfo()`（关底守卫按幕染色） |
 | 震屏与打击反馈 | `CFG.FEEL` |
 
 ⚠️ 内部怪物 `type` key（`spore/swift/split/mimic/thief/bomber/elite/boss`）**不要改**，选敌、击杀、Boss 流程都依赖它；改显示名只动 `ETYPE[type].name`。
@@ -145,7 +147,7 @@ python3 -m http.server 8080
 
 ## 路线图
 
-- [ ] **关卡循环改造**：每关从 Lv1 练到 Lv20 → 触发关底 Boss → 击杀过关（设计已定稿，见 `docs/关卡循环设计.md`）
+- [x] **关卡循环改造**：每关从 Lv1 练到 Lv20 → 触发关底 Boss → 击杀过关（2026-11-19 完成，见 `docs/关卡循环设计.md`）
 - [ ] **内容扩展**：武器 5→12、被动 9→15、怪物 8→16，按幕逐步解锁
 - [ ] 武器进化合成
 - [ ] 暂停键、排行榜

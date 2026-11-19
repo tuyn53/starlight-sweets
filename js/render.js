@@ -676,17 +676,15 @@ function updateHUD(force){
   }
 }
 function levelGoalPct(){
-  if(isBossLevel(game.level)){
-    return game.boss? clamp(game.boss.hp/game.boss.maxHp,0,1)*100 : 0;
-  }
-  const tar=levelTargets(game.level);
-  const pTime=clamp(game.levelTime/tar.time,0,1), pKill=clamp(game.levelKills/tar.kills,0,1);
-  return Math.min(pTime,pKill)*100;
+  // 目标条 = 关内等级进度（Lv1→Lv20）；满级后保持满格，决战进度交给 bossbar
+  return clamp((player.level-1)/(CFG.LEVEL.playerMax-1),0,1)*100;
 }
 function levelGoalText(){
-  if(isBossLevel(game.level)) return `目标：击败 ${game.bossKind.title}`;
-  const tar=levelTargets(game.level);
-  return `目标：存活 ${Math.min(game.levelTime|0,tar.time)}/${Math.round(tar.time)}s · 击退 ${Math.min(game.levelKills,tar.kills)}/${tar.kills}`;
+  const max=CFG.LEVEL.playerMax;
+  if(game.bossSpawned) return `⚔️ 关底决战：击败 ${game.bossKind.title}·${game.bossKind.name}`;
+  if(game.bossIntro) return '🌟 星光满溢 · 关底正在降临…';
+  if(player.level>=max) return '🌟 星光满溢 · 即将迎战关底！';
+  return `目标：升到 Lv${max} 迎战关底 · 当前 Lv${player.level}/${max}`;
 }
 function showBossBar(on){
   document.getElementById('bossbar').style.display=on?'block':'none';
@@ -704,5 +702,7 @@ function clearToast(){
   game.toastT=0;
   const el=document.getElementById('toast'); el.classList.remove('show'); el.textContent='';
 }
-const show=id=>document.getElementById(id).classList.remove('hidden');
-const hide=id=>document.getElementById(id).classList.add('hidden');
+// DOM 可见性镜像：show/hide 时同步维护，避免每帧查询 offsetParent（强制重排）
+const VIS={ menu:true, levels:false, result:false, levelup:false };
+const show=id=>{ document.getElementById(id).classList.remove('hidden'); if(id in VIS) VIS[id]=true; };
+const hide=id=>{ document.getElementById(id).classList.add('hidden');    if(id in VIS) VIS[id]=false; };

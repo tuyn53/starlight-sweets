@@ -14,13 +14,20 @@ const SPRITE_SRC = {
 };
 let spritesReady = false;
 
-function loadSprites(onDone){
-  let left = Object.keys(SPRITE_SRC).length;
-  const done = ()=>{ if(--left<=0){ spritesReady=true; if(onDone) onDone(); } };
-  for(const k in SPRITE_SRC){
+function loadSprites(onDone, onProgress){
+  const keys = Object.keys(SPRITE_SRC);
+  const total = keys.length;
+  let finished = 0;
+  // 每张完成（成功或失败）都推进真实进度；失败也算"已处理"，否则进度条会卡死
+  const step = (ok, k)=>{
+    finished++;
+    if(onProgress) onProgress(finished, total, ok, k);
+    if(finished>=total){ spritesReady=true; if(onDone) onDone(); }
+  };
+  for(const k of keys){
     const img = new Image();
-    img.onload = done;
-    img.onerror = ()=>{ console.warn('[sprites] 加载失败，使用程序化回退:',k); done(); };
+    img.onload  = ()=>step(true, k);
+    img.onerror = ()=>{ console.warn('[sprites] 加载失败，使用程序化回退:',k); step(false, k); };
     img.src = SPRITE_SRC[k];
     SPRITES[k] = img;
   }

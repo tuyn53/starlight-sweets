@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>甜星大作战 · 真实帧率探针</title>
+<style>
+  body{margin:0;background:#1a1a1f;color:#e8e8ef;font:14px/1.6 -apple-system,sans-serif;padding:16px;}
+  h1{font-size:16px;margin:0 0 8px;} p{color:#a0a0b0;margin:0 0 14px;font-size:12px;}
+  button{background:#3a7bd5;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:14px;margin:0 6px 12px 0;}
+  button.off{background:#555;}
+  #out{white-space:pre-wrap;font:12px/1.5 ui-monospace,monospace;background:#23232b;padding:12px;border-radius:8px;min-height:200px;}
+  canvas{display:block;background:#2a3a2a;margin-top:12px;border-radius:8px;}
+</style></head><body>
+<h1>真实帧率探针 · rAF 帧间隔</h1>
+<p>量的是"实际多少帧在画"，不是"画一次要多久"。挂在 requestAnimationFrame 上记录每帧间隔。<br>点开始后保持页面在前台 10 秒（可切到游戏页对比）。16.7ms=60fps，33ms=30fps。<br>测完把结果和下面那条曲线截图发我。</p>
+<button id="run">开始测量 10 秒</button><button id="heavy">重负载测量（满屏绘制）</button>
+<div id="out">等待测量…</div>
+<canvas id="chart" width="360" height="90"></canvas>
+<script>
+const out=document.getElementById('out'), chart=document.getElementById('chart'), cx=chart.getContext('2d');
+let running=false;
+function stats(ms){
+  const a=ms.slice().sort((x,y)=>x-y), n=a.length;
+  const avg=a.reduce((x,y)=>x+y,0)/n;
+  return {avg:avg.toFixed(1),p50:a[Math.floor(n*.5)].toFixed(1),p95:a[Math.floor(n*.95)].toFixed(1),
+          p99:a[Math.floor(n*.99)].toFixed(1),max:a[n-1].toFixed(1),
+          over33:a.filter(x=>x>33).length, n};
+}
+function drawChart(ms){
+  cx.clearRect(0,0,chart.width,chart.height);
+  cx.fillStyle='#23232b';cx.fillRect(0,0,chart.width,chart.height);
+  cx.strokeStyle='#555';cx.beginPath();cx.moveTo(0,33/50*90);cx.lineTo(chart.width,33/50*90);cx.stroke();
+  cx.fillStyle='#888';cx.font='10px sans-serif';cx.fillText('33ms(30fps)',4,33/50*90-3);
+  cx.strokeStyle='#5ad6ff';cx.beginPath();
+  const step=chart.width/ms.length;
+  for(let i=0;i<ms.length;i++){const y=Math.min(90,ms[i]/50*90);i?cx.lineTo(i*step,y):cx.moveTo(0,y);}
+  cx.stroke();
+}
+function measure(heavy){
+  if(running) return; running=true;
+  const ms=[], t0=performance.now();
+  // 重负载模式：每帧真的画满屏，模拟游戏 worst case
+  let c=null,g=null,es=[];
+  if(heavy){
+    c=document.createElement('canvas');c.width=innerWidth*2;c.height=innerHeight*2;
+    c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';
+    c.style.position='fixed';c.style.top='0';c.style.left='0';c.style.zIndex='-1';
+    document.body.appendChild(c);g=c.getContext('2d');g.setTransform(2,0,0,2,0,0);
+    const sp=document.createElement('canvas');sp.width=sp.height=256;
+    const sg=sp.getContext('2d');sg.fillStyle='#8fe3a8';sg.beginPath();sg.arc(128,128,128,0,7);sg.fill();
+    for(let i=0;i<80;i++)es.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,a:Math.random()*7,sp});
+  }
+  let last=performance.now(), f=0;
+  function loop(now){
+    const gap=now-last;last=now;
+    if(f>5) ms.push(gap);   // 丢掉前 5 帧预热
+    if(heavy && c){
+      g.clearRect(0,0,innerWidth,innerHeight);
+      for(const e of es){g.save();g.translate(e.x,e.y);g.rotate(e.a+f*0.01);
+        for(let k=0;k<4;k++){g.drawImage(e.sp,e.x-22+k*8,e.y-44,28,26);}
+        g.drawImage(e.sp,e.x-22,e.y-44,44,44);g.restore();}
+    }
+    f++;
+    if(now-t0>=10000){
+      running=false;
+      if(heavy&&c) c.remove();
+      const s=stats(ms);
+      const fps=(1000/parseFloat(s.avg)).toFixed(0);
+      out.innerHTML='模式：'+(heavy?'重负载满屏绘制':'空闲/当前页面')+'\n'+
+        '帧数 '+s.n+' · 平均帧间隔 '+s.avg+'ms（约 '+fps+'fps）\n'+
+        'p50 '+s.p50+'ms · p95 '+s.p95+'ms · p99 '+s.p99+'ms · 最大 '+s.max+'ms\n'+
+        '超过 33ms 的帧：'+s.over33+' / '+s.n+'\n\n'+
+        '判读：p95<20ms 流畅；p95 20-33ms 轻卡；p95>33ms 明显掉帧；\n'+
+        'p99 远高于 p50 → 周期性顿挫（GC/编译/发热）。';
+      drawChart(ms);
+    } else requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+document.getElementById('run').onclick=()=>{out.textContent='测量中 10 秒，保持页面前台…';measure(false);};
+document.getElementById('heavy').onclick=()=>{out.textContent='重负载测量中 10 秒…';measure(true);};
+</script></body></html>

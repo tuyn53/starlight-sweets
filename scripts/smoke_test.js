@@ -51,47 +51,73 @@ function ok(name,cond){ if(cond){pass++;console.log('  ✓',name);}else{fail++;c
 
 console.log('\n[1] 初始状态与配置');
 ok('总关卡=20', run('CFG.LEVEL.total')===20);
+ok('满级=20', run('CFG.LEVEL.playerMax')===20);
+ok('经验曲线=1.18', run('CFG.XP_GROW')===1.18);
 ok('初始已解锁=1', run('game.unlocked')===1);
-ok('第5关是Boss关', run('isBossLevel(5)')===true);
-ok('第6关不是Boss关', run('isBossLevel(6)')===false);
+ok('第5关是主题Boss关', run('isBossLevel(5)')===true);
+ok('第6关不是主题Boss关', run('isBossLevel(6)')===false);
 ok('第1关场景=阳光草地', run("actOf(1).name")==='阳光草地');
 ok('第7关场景=糖果森林', run("actOf(7).name")==='糖果森林');
 ok('第13关场景=云端天空', run("actOf(13).name")==='云端天空');
 ok('第18关场景=星光城堡', run("actOf(18).name")==='星光城堡');
 ok('第20关Boss=黑森林', run("bossInfo(20).name")==='黑森林');
 
-console.log('\n[2] 关卡初始化');
+console.log('\n[2] 关卡初始化：起手完全一致，不继承数值');
 run('startLevel(1)');
 ok('状态=playing', run('game.state')==='playing');
 ok('关卡=1', run('game.level')===1);
+ok('玩家=Lv1', run('player.level')===1);
 ok('初始1把星芒', run('Object.keys(player.weapons).length')===1 && run("!!player.weapons.bolt"));
+ok('起手伤害=1', run('player.damage')===1);
 ok('甜系命名:棉棉', run("ETYPE.spore.name")==='棉棉');
-ok('甜系命名:爆米', run("ETYPE.bomber.name")==='爆米');
+ok('第1关有怪池表', run('levelRoster(1).pool.length')===3);
+run('startLevel(20)');
+ok('第20关同样Lv1起手', run('player.level')===1);
+ok('第20关同样只1把星芒', run('Object.keys(player.weapons).length')===1);
+ok('第20关伤害仍=1(无起跑线加成)', run('player.damage')===1);
+ok('第20关起手HP=100', run('player.maxHp')===100);
 run('startLevel(10)');
-ok('第10关有2把武器(星芒4级+星环)', run('Object.keys(player.weapons).length')===2 && run('player.weapons.bolt.level')===4);
-ok('第10关起跑伤害>1', run('player.damage')>1);
-ok('第10关是Boss关', run('isBossLevel(game.level)')===true);
-ok('第10关Boss=抹茶', run('game.bossKind.name')==='抹茶');
+ok('第10关是主题Boss关', run('isBossLevel(game.level)')===true);
+ok('第10关关底=抹茶', run('game.bossKind.name')==='抹茶');
+ok('主题Boss非守卫', run('game.bossGuard')===false);
+run('startLevel(6)');
+ok('第6关关底=关底守卫', run('game.bossGuard')===true);
+ok('普通关也有bossKind(守卫)', run('game.bossKind!==null')===true);
 
-console.log('\n[3] 普通关通关判定');
+console.log('\n[3] 满级触发关底（普通关不再按存活/击杀过关）');
 run('startLevel(2)');
-// 直接把目标拉满
-run('startLevel(2); game.levelTime=levelTargets(2).time+1; game.levelKills=levelTargets(2).kills+1;');
-run('update(CFG.STEP)');
-ok('双目标达成→clear', run('game.state')==='clear');
+// 把经验喂到足够升满级，gainXp 的循环会逐级升到 Lv20 封顶
+run('player.xp=1e9; gainXp(0);');
+ok('升到满级Lv20', run('player.level')===20);
+// 模拟玩家选完最后一张升级卡（state 回到 playing、pendingLevels 清零）
+run('game.pendingLevels=0; game.state="playing"; update(CFG.STEP)');
+ok('满级触发关底演出', run('game.bossIntro')===true);
+ok('演出中Boss未降临', run('game.bossSpawned')===false);
+run('for(var i=0;i<300;i++) update(CFG.STEP)');
+ok('演出结束Boss降临', run('game.bossSpawned')===true);
+ok('第2关关底=守卫', run('game.bossGuard')===true);
+ok('守卫血量按守卫公式(2400+2*220=2840)', run('game.boss.maxHp')===2840);
+ok('守卫两阶段(maxPhase=2)', run('game.boss.maxPhase')===2);
+run('killEnemy(game.boss)');
+ok('击杀守卫→clear', run('game.state')==='clear');
 ok('解锁推进到3', run('game.unlocked')===3);
 ok('进度已存localStorage', store['starlight_guard_progress']==='3');
+// 未满级绝不过关
+run('startLevel(2); game.levelTime=9999; game.levelKills=9999; update(CFG.STEP)');
+ok('存活再久未满级也不过关', run('game.state')==='playing');
 
-console.log('\n[4] Boss关流程');
+console.log('\n[4] 主题Boss关流程（满级→主题Boss三阶段）');
 run('startLevel(5)');
-ok('Boss未降临', run('game.bossSpawned')===false);
-run('game.levelTime=CFG.LEVEL.bossDelay+0.1; update(CFG.STEP)');
+ok('开场Boss未降临', run('game.bossSpawned')===false);
+run('player.level=CFG.LEVEL.playerMax; game.pendingLevels=0; update(CFG.STEP)');
+ok('满级进入演出', run('game.bossIntro')===true);
+run('for(var i=0;i<300;i++) update(CFG.STEP)');
 ok('Boss已降临', run('game.bossSpawned')===true);
-ok('Boss显示名=莓莓', run('game.boss.displayName')==='莓莓');
-ok('Boss血量按关卡(900+5*180=1800)', run('game.boss.maxHp')===1800);
-// 击杀Boss
+ok('主题Boss显示名=莓莓', run('game.boss.displayName')==='莓莓');
+ok('主题Boss血量(5000+5*500=7500)', run('game.boss.maxHp')===7500);
+ok('主题Boss三阶段(maxPhase=3)', run('game.boss.maxPhase')===3);
 run('killEnemy(game.boss)');
-ok('击杀Boss→clear', run('game.state')==='clear');
+ok('击杀主题Boss→clear', run('game.state')==='clear');
 
 console.log('\n[5] 失败流程');
 run('startLevel(3)');
@@ -110,6 +136,13 @@ run("spawnEnemy('split',0,0)");
 ok('团子有分裂机制', run('game.enemies[game.enemies.length-1].mech')==='split');
 run("spawnEnemy('mimic',0,0)");
 ok('果冻有隐身机制', run('game.enemies[game.enemies.length-1].mech')==='stealth');
+
+console.log('\n[6.1] 满级停经验');
+run('startLevel(1); player.level=CFG.LEVEL.playerMax; player.hp=50; player.xp=0;');
+run('gainXp(100)');
+ok('满级后等级不变', run('player.level')===20);
+ok('满级后经验不累积', run('player.xp')===0);
+ok('满级经验转微量回血', run('player.hp')>50);
 
 console.log('\n[7] 选敌优先级');
 run('startLevel(1); game.enemies=[]; player.x=0; player.y=0;');
