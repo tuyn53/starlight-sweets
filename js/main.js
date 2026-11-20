@@ -35,42 +35,29 @@ function refreshMenuProgress(){
 }
 
 const sceneLayer=document.getElementById('sceneTransition');
-const sceneIris=sceneLayer.querySelector('.scene-iris');
-const sceneSpark=sceneLayer.querySelector('.scene-spark');
+const sceneWrap=sceneLayer.querySelector('.scene-wrap');
 
 async function transitionTo(action,origin){
   if(sceneBusy) return;
-  if(prefersReducedMotion() || !sceneIris.animate){ action(); return; }
-
-  const rect=origin?.getBoundingClientRect();
-  const x=rect?clamp(rect.left+rect.width/2,0,innerWidth):innerWidth/2;
-  const y=rect?clamp(rect.top+rect.height/2,0,innerHeight):innerHeight/2;
-  // Size the disc to cover the farthest corner, including when activated from an edge.
-  const diameter=2*(Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y))+4);
-  sceneLayer.style.setProperty('--scene-x',x+'px');
-  sceneLayer.style.setProperty('--scene-y',y+'px');
-  sceneLayer.style.setProperty('--scene-size',diameter+'px');
-
   sceneBusy=true;
-  sceneLayer.classList.remove('hidden');
-  const closed='translate(-50%, -50%) scale(1)';
-  const open='translate(-50%, -50%) scale(0)';
   try {
-    sceneSpark.animate([
-      {opacity:0,scale:.65}, {opacity:1,scale:1,offset:.32}, {opacity:0,scale:1.3},
-    ],{duration:290,easing:'ease-out'});
-    const cover=sceneIris.animate([{transform:open},{transform:closed}],
-      {duration:185,easing:'cubic-bezier(.36, 0, .2, 1)',fill:'forwards'});
+    if(prefersReducedMotion() || !sceneWrap.animate){ action(); return; }
+    const rect=origin?.getBoundingClientRect();
+    const y=rect?clamp(rect.top+rect.height/2,36,innerHeight-36):innerHeight/2;
+    sceneLayer.style.setProperty('--scene-y',y+'px');
+    sceneLayer.classList.remove('hidden');
+    const cover=sceneWrap.animate([{transform:'translateX(-100%)'},{transform:'none'}],
+      {duration:185,easing:'cubic-bezier(.35,.02,.28,1)',fill:'forwards'});
     await cover.finished;
     action();
     render(0);
-    const reveal=sceneIris.animate([{transform:closed},{transform:open}],
-      {duration:195,easing:'cubic-bezier(.16, 1, .3, 1)',fill:'forwards'});
+    const reveal=sceneWrap.animate([{transform:'none'},{transform:'translateX(100%)'}],
+      {duration:225,easing:'cubic-bezier(.44,0,.24,1)',fill:'forwards'});
     cover.cancel();
     await reveal.finished;
   } finally {
     sceneLayer.classList.add('hidden');
-    for(const animation of sceneLayer.getAnimations({subtree:true})) animation.cancel();
+    for(const animation of sceneWrap.getAnimations?.()||[]) animation.cancel();
     sceneBusy=false;
   }
 }
@@ -289,7 +276,6 @@ function finishLoading(){
 function enterGame(){
   if(entered || !loadLayer.classList.contains('ready')) return;  // 未就绪或已入场时忽略
   entered=true;
-  loadLayer.classList.remove('ready');
   transitionTo(()=>{
     loadLayer.classList.add('done');
     loadLayer.style.display='none';

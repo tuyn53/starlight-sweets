@@ -225,13 +225,23 @@ function drawAura(){
   const R=(70+lv*13)*areaScale(), t=game.time;
   ctx.save(); ctx.translate(player.x,player.y);
   const rank=skillRank('aura'), count=4+rank, pal=CANDY_GLASS.mint;
-  ctx.rotate(t*.22);
+  const beat=clamp(1-player.auraTick/.5,0,1);
+  const wash=ctx.createRadialGradient(0,0,R*.15,0,0,R);
+  wash.addColorStop(0,'#8cffe000');wash.addColorStop(.83,'#59c9ad17');wash.addColorStop(1,'#36988638');
+  ctx.fillStyle=wash;ctx.beginPath();ctx.arc(0,0,R,0,TAU);ctx.fill();
   for(let i=0;i<count;i++){
-    ctx.rotate(TAU/count);
-    ctx.beginPath(); ctx.arc(0,0,R,-.22,.22); ctx.strokeStyle=pal[0]; ctx.lineWidth=2; ctx.stroke();
-    cutGem(R,0,Math.PI/2,7,3,pal);
-    if(rank>=2) cutGem(R-6,0,0,3,2,pal);
-    if(rank===3){ ctx.beginPath(); ctx.arc(0,0,R-4,.25,.42); ctx.stroke(); }
+    const a=i*TAU/count+t*.15, b=a+TAU/count;
+    const x=R*Math.cos(a), y=R*Math.sin(a), nx=R*Math.cos(b), ny=R*Math.sin(b);
+    const mx=(x+nx)*.45,my=(y+ny)*.45, h=14+rank*3;
+    ctx.beginPath();ctx.moveTo(x,y-3);ctx.quadraticCurveTo(mx,my+7,nx,ny-3);
+    ctx.lineTo(nx,ny-h);ctx.quadraticCurveTo(mx,my+4,x,y-h);ctx.closePath();
+    ctx.fillStyle='#77dabc42';ctx.fill();
+    ctx.beginPath();ctx.moveTo(x,y-h);ctx.quadraticCurveTo(mx,my+4,nx,ny-h);
+    ctx.strokeStyle='#398b80';ctx.lineWidth=1.6;ctx.stroke();
+    cutGem(x,y-h/2,-Math.PI/2,h*.72,4+rank,pal);
+    const u=1-beat;
+    cutGem(u*u*x+2*u*beat*mx+beat*beat*nx,u*u*(y-h)+2*u*beat*(my+4)+beat*beat*(ny-h),
+      Math.atan2(ny-y,nx-x),4,2,pal);
   }
   ctx.restore();
 }
@@ -357,6 +367,10 @@ function drawEnemies(alpha){
     const R=big?e.r:Math.max(e.type==='swarm'?13:22,e.r*1.55);
     ctx.save(); ctx.translate(x,y);
     shadow(0,R,R*(big?1.05:0.9),R*0.34,big?0.34:0.24);
+    if(e.inClockField && !e.hidden){
+      ctx.strokeStyle='#775e9f';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(-6,R-4);ctx.lineTo(6,R-4);ctx.lineTo(-5,R+4);ctx.lineTo(5,R+4);ctx.closePath();ctx.stroke();
+    }
     if(big){
       const gr=ctx.createRadialGradient(0,0,R*0.5,0,0,R*1.7);
       const c=e.color;
@@ -495,7 +509,7 @@ function drawNova(){
   for(const f of game.fx){
     if(f.type!=='nova')continue;
     const rank=skillRank('nova');
-    crystalBloom(f.x,f.y,f.R,1-f.life/f.max,rank,CANDY_GLASS.rose,6+2*rank);
+    drawStarburst(f,rank);
   }
 }
 // 流星（原紫电 → 金色流星拖尾 + 星芒落点）
@@ -540,17 +554,23 @@ function drawExpansionGround(){
   for(const field of game.timeFields){
     const age=field.max-field.life, rank=skillRank('chrono'), pal=CANDY_GLASS.iris;
     ctx.save(); ctx.translate(field.x,field.y);
+    const tick=age*3, handAngle=(Math.floor(tick)+Math.min(1,(tick%1)*5))*TAU/12-Math.PI/2;
+    ctx.fillStyle='#a389d326';ctx.beginPath();ctx.arc(0,0,field.r,0,TAU);ctx.fill();
+    ctx.save();ctx.rotate(handAngle);
+    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,field.r*.96,-.52,0);ctx.closePath();ctx.fillStyle='#aa92d24a';ctx.fill();
+    cutGem(field.r*.40,0,0,field.r*.40,3+rank,pal);ctx.restore();
+    const swing=Math.sin(age*4.7)*.42;
+    ctx.save();ctx.rotate(swing);
+    ctx.strokeStyle='#9c774f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,field.r*.43);ctx.stroke();
+    cutGem(0,field.r*.43,Math.PI/2,9+rank,6,CANDY_GLASS.honey);ctx.restore();
     for(let i=0;i<12;i++){
       const a=i*TAU/12-Math.PI/2;
-      const active=i===Math.floor(age*4)%12;
+      const active=i===Math.floor(tick)%12;
       ctx.beginPath(); ctx.arc(0,0,field.r,a+.05,a+(active?.48:.21));
       ctx.lineWidth=active?3:1.4; ctx.strokeStyle=pal[0]; ctx.stroke();
       if(i%3===0||active) cutGem(Math.cos(a)*field.r,Math.sin(a)*field.r,a,active?7:4,2.5,pal);
     }
-    const hand=Math.floor(age*4)*TAU/12-Math.PI/2;
-    cutGem(Math.cos(hand)*(field.r-14),Math.sin(hand)*(field.r-14),hand,8,3,pal);
-    if(rank>1) cutGem(Math.cos(-hand)*24,Math.sin(-hand)*24,-hand,12,2,pal);
-    if(rank===3) cutGem(0,0,age,6,4,pal);
+    cutGem(0,0,age,6,4,pal);
     ctx.restore();
   }
   for(const mine of game.mines){
@@ -637,6 +657,20 @@ function drawPlayer(alpha){
     ctx.beginPath(); ctx.arc(0,R*0.6,3+Math.sin(T*5),0,TAU); ctx.fill(); ctx.shadowBlur=0;
   }
   ctx.restore();
+  const age=T-(player.shieldHitAt??-Infinity);
+  if(age>=0 && age<.36){
+    const p=age/.36, compression=Math.sin(Math.PI*Math.min(1,p*3));
+    ctx.save();ctx.translate(x,y);ctx.rotate(player.shieldAngle);
+    ctx.translate(21-5*compression+4*p,0);ctx.scale(1-.3*compression,1+.12*compression);
+    ctx.globalAlpha=1-p*p;
+    ctx.beginPath();ctx.moveTo(-5,-17);ctx.quadraticCurveTo(6,-14,12,-18);
+    ctx.quadraticCurveTo(18,1,4,19);ctx.quadraticCurveTo(-6,15,-9,-4);ctx.closePath();
+    ctx.fillStyle='#86dcee';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#3d6884';ctx.stroke();
+    ctx.beginPath();ctx.moveTo(4,14);ctx.lineTo(4,-11);ctx.lineTo(10,-13);ctx.quadraticCurveTo(14,0,4,14);
+    ctx.fillStyle='#e7fcfc';ctx.fill();
+    cutGem(-1,0,Math.PI/2,6,3,CANDY_GLASS.honey);
+    ctx.restore();
+  }
 }
 function drawParts(){
   for(const p of game.parts){

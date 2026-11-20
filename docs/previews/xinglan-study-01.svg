@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="512" height="512">
+<title>星澜 · 短双马尾星糖法师造型研究</title>
+<defs>
+  <linearGradient id="mint" x2=".4" y2="1"><stop stop-color="#c5fff0"/><stop offset=".5" stop-color="#7de2cc"/><stop offset="1" stop-color="#48adad"/></linearGradient>
+  <linearGradient id="cream" x2=".5" y2="1"><stop stop-color="#ffffee"/><stop offset=".67" stop-color="#fff2d6"/><stop offset="1" stop-color="#e3bbad"/></linearGradient>
+  <linearGradient id="gold" x2=".6" y2="1"><stop stop-color="#fff4af"/><stop offset=".52" stop-color="#ffd175"/><stop offset="1" stop-color="#ed9862"/></linearGradient>
+  <path id="star" d="M0-18 5-6 18-5 9 4 11 16 0 10-11 16-9 4-18-5-5-6Z"/>
+  <g id="tail">
+    <path d="M10 3C-3-18-32-19-44-3C-51 6-47 17-57 22Q-52 28-44 26C-45 48-22 58-2 46C9 40 20 20 10 3Z" fill="url(#mint)"/>
+    <path d="M-42 28Q-36 46-18 40Q-7 36-2 23Q-3 42-16 47Q-33 55-42 36" fill="#419eaa" stroke="none"/>
+    <path d="M-39 2Q-31-10-17-7" fill="none" stroke="#d9fff0" stroke-width="4"/>
+    <path d="M6 1Q20-2 24 10L13 27Q0 23-2 15Z" fill="#eaa0aa"/>
+    <path d="M3 6 15 18" fill="none" stroke="#ffe2ce" stroke-width="3"/>
+  </g>
+  <g id="eye">
+    <path d="M-9 0Q-7-12 2-11Q11-10 10 3Q10 14 1 14Q-8 14-9 0Z" fill="#48475c" stroke="none"/>
+    <path d="M-5 7Q1 11 7 5Q7 13 1 13Q-5 13-5 7Z" fill="#52aaa9" stroke="none"/>
+    <ellipse cx="3" cy="-5" rx="3.5" ry="4" fill="#fff9df" stroke="none"/>
+    <path d="M-12-6Q-5-13 3-12" fill="none" stroke-width="3"/>
+  </g>
+</defs>
+<g stroke="#524655" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+  <g id="feet" fill="#507783">
+    <path d="M117 258Q113 268 111 278Q103 285 106 291Q111 298 133 293Q138 289 138 267Z"/>
+    <path d="M155 263Q157 280 162 290Q173 296 188 288Q190 283 181 277L177 258Z"/>
+    <path d="M110 288Q120 291 133 286M164 288Q176 289 183 283" stroke="#bbd8cb" fill="none" stroke-width="2.5"/>
+  </g>
+  <g id="coat">
+    <path d="M107 208Q100 231 95 252Q104 262 117 261Q127 274 142 266Q155 277 169 265Q185 269 195 255L176 208Z" fill="#599e9d"/>
+    <path d="M107 248Q124 258 139 252Q160 261 177 250" fill="none" stroke="#a5ddc9"/>
+    <path d="M108 185Q101 200 86 216Q82 222 86 227Q94 237 109 232Q120 242 136 234L147 210L151 235Q172 244 187 228Q203 229 211 220Q195 198 177 187Z" fill="url(#cream)"/>
+    <path d="M88 223Q99 231 110 224Q121 235 134 226M156 228Q173 233 186 221Q198 222 204 216" fill="none" stroke="#d9ad69" stroke-width="2.5"/>
+    <path d="M125 198Q141 216 151 213Q155 204 158 197" fill="#479f9c"/>
+    <use href="#star" transform="translate(148 213) scale(.49)" fill="url(#gold)"/>
+  </g>
+  <g id="rest-hand"><path d="M88 227Q82 228 81 235Q80 241 88 242Q96 243 98 235L96 231Z" fill="#ffd4ba"/></g>
+  <g id="head">
+    <use href="#tail" transform="translate(82 104) rotate(-12)"/>
+    <use href="#tail" transform="translate(210 101) scale(-.88 .9) rotate(-20)"/>
+    <path d="M76 111Q68 63 108 44Q128 34 147 38Q146 29 138 26Q154 24 163 38Q198 34 219 63Q241 97 224 144Q218 164 205 171L85 167Q65 149 76 111Z" fill="url(#mint)"/>
+    <path d="M86 102Q102 72 163 76Q214 74 223 110Q232 155 206 177Q182 198 144 197Q97 198 82 173Q69 155 77 135Z" fill="#ffddc4"/>
+    <path d="M84 164Q105 188 143 188Q188 191 216 162Q206 193 160 197Q103 204 84 176Z" fill="#f6c4b4" stroke="none"/>
+    <path d="M79 134Q66 104 80 77Q96 43 138 42Q182 34 209 62Q225 78 225 111Q212 106 204 90Q206 107 196 119Q183 112 177 94Q168 109 144 120Q147 112 146 105Q128 126 105 126Q111 119 114 110Q100 127 84 127Q82 146 74 151Q74 141 79 134Z" fill="url(#mint)"/>
+    <path d="M93 85Q102 66 124 61M135 57Q145 54 153 54" stroke="#d4ffed" stroke-width="5" fill="none"/>
+    <use href="#eye" transform="translate(130 147)"/>
+    <use href="#eye" transform="translate(189 141) scale(.89 .96)"/>
+    <g stroke="none" fill="#f0a99f"><ellipse cx="106" cy="159" rx="10" ry="5"/><ellipse cx="205" cy="153" rx="8" ry="4"/></g>
+    <path d="M148 161Q155 166 163 159Q162 170 156 171Q151 171 148 161Z" fill="#cf7f85" stroke-width="2"/>
+    <use href="#star" transform="translate(94 91) rotate(-16)" fill="url(#gold)"/>
+    <path d="M90 91 94 78 96 89Z" fill="#fff5c4" stroke="none"/>
+  </g>
+  <g id="wand" transform="rotate(18 218 212)">
+    <path d="M215 238L214 161Q218 155 222 161L222 237Q219 244 215 238Z" fill="url(#gold)"/>
+    <path d="M211 167Q219 170 225 165L225 158 210 158Z" fill="#60c4bb"/>
+    <use href="#star" transform="translate(218 143) scale(1.27)" fill="url(#gold)"/>
+    <path d="M218 125 220 142 212 150Z" fill="#fff7bf" stroke="none"/>
+  </g>
+  <g id="wand-hand">
+    <path d="M189 216Q192 200 207 198L218 207Q218 218 205 223Q196 227 189 216Z" fill="#9cddcd"/>
+    <path d="M209 203Q209 196 215 194Q219 191 221 197Q229 194 230 201Q233 210 221 214Q213 215 209 209Z" fill="#ffdcc1"/>
+  </g>
+</g>
+</svg>

@@ -335,9 +335,13 @@ function killEnemy(e){
     levelClear();
   }
 }
-function hurtPlayer(dmg){
+function hurtPlayer(dmg,source){
   if(player.invuln>0||game.state!=='playing') return;
   const real=Math.max(1, Math.round(dmg)-player.armor);
+  if(real<Math.round(dmg)){
+    player.shieldHitAt=game.time;
+    player.shieldAngle=source?Math.atan2(source.y-player.y,source.x-player.x):Math.atan2(player.faceY,player.faceX);
+  }
   player.hp-=real; player.invuln=0.65; game.flash=.5; player.sq=1; player.sqT=0.22;
   Juice.feedback('large',player.x,player.y,CFG.ART.boss.main);
   addDmgText(player.x,player.y-player.r-8,real,false,'#ff6f92');
@@ -519,6 +523,7 @@ function updateEnemies(dt){
     const ux=dx/d, uy=dy/d;
     e.face=Math.atan2(dy,dx);
     const timeSlowed=game.timeFields.some(f=>dist2(e.x,e.y,f.x,f.y)<f.r*f.r);
+    e.inClockField=timeSlowed;
     const boosted=buffers.some(b=>b!==e && !b.dead && dist2(e.x,e.y,b.x,b.y)<115**2);
     let spd=e.speed*(e.slow>0?.45:timeSlowed?.6:1)*(boosted?1.3:1), mvx=ux, mvy=uy;
 
@@ -647,7 +652,7 @@ function updateEnemies(dt){
     const advancing=e.mech==='dash' && e.dashT<.32?0:Math.hypot(mvx,mvy)*spd*dt;
     Rig.trackWalk(e,advancing,dt,e.type==='boss'?34:isEliteEnemy(e)?29:25);
     e.kx*=Math.pow(0.02,dt); e.ky*=Math.pow(0.02,dt);
-    if(e.mech!=='explode' && game.time>=(e.contactAt||0) && d<e.r+player.r-4) hurtPlayer(e.dmg);
+    if(e.mech!=='explode' && game.time>=(e.contactAt||0) && d<e.r+player.r-4) hurtPlayer(e.dmg,e);
   }
 }
 
@@ -659,7 +664,7 @@ function explodeBomber(e){
   game.fx.push({type:'boom',x:e.x,y:e.y,r:20,R:96,life:0.32,max:0.32});
   Juice.feedback('medium',e.x,e.y,'#ff9ba6');
   Sound.kill();
-  if(dist2(e.x,e.y,player.x,player.y)<96*96) hurtPlayer(18);
+  if(dist2(e.x,e.y,player.x,player.y)<96*96) hurtPlayer(18,e);
   dropGem(e.x,e.y,e.xp);
 }
 
@@ -671,7 +676,7 @@ function updateHazards(dt){
     h.tick-=dt;
     if(h.tick<=0){
       h.tick=CFG.SPORE.hazardTick;
-      if(dist2(h.x,h.y,player.x,player.y)<h.r*h.r) hurtPlayer(h.damage??CFG.SPORE.hazardDmg);
+      if(dist2(h.x,h.y,player.x,player.y)<h.r*h.r) hurtPlayer(h.damage??CFG.SPORE.hazardDmg,h);
     }
   }
 }
@@ -850,7 +855,7 @@ function updateEBullets(dt){
     const b=game.ebullets[i]; b.x+=b.vx*dt; b.y+=b.vy*dt; b.life-=dt;
     let gone=b.life<=0;
     if(!gone && dist2(b.x,b.y,player.x,player.y)<(b.r+player.r)*(b.r+player.r)){
-      hurtPlayer(b.dmg);
+      hurtPlayer(b.dmg,b);
       if(b.kind==='bubble-shot') player.slowUntil=game.time+.8;
       gone=true;
     }
@@ -918,7 +923,7 @@ function updateFx(dt){
       if(f.key) addMotion(f.key,f.x,f.y,f.r*2.7);
       else game.fx.push({...f,type:'bossBurst',life:.38,max:.38});
       if(dist2(f.x,f.y,player.x,player.y)<f.r*f.r){
-        hurtPlayer(22);
+        hurtPlayer(22,f);
         if(f.key==='souffle-gust' && !f.attack.pushed){
           f.attack.pushed=true;
           const a=Math.atan2(player.y-f.owner.y,player.x-f.owner.x);
@@ -934,7 +939,7 @@ function updateFx(dt){
       const across=Math.abs(-px*Math.sin(f.a)+py*Math.cos(f.a));
       if(along>0 && along<f.len && across<26 && !f.attack?.hit){
         if(f.attack) f.attack.hit=true;
-        hurtPlayer(22);
+        hurtPlayer(22,f);
       }
       Juice.addTrauma(.24);
     }

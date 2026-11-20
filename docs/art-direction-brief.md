@@ -1,7 +1,7 @@
 # 甜星大作战 SWEET STAR BLITZ — 角色精灵美术契约
 
 > 用途：AI 生成角色精灵的统一约束。每次生成必须对照本契约，禁止凭"好看"这种词judge。
-> 最后更新：2026-11-18（整体风格改为 Q 版卡通可爱；角色新增甜系显示名，内部 type key 不变）
+> 最后更新：2026-11-20（主角独立制作标准见第 5 节；不再套用怪物静态精灵模板）
 >
 > **命名对照（内部 key → 甜系显示名）**：spore→棉棉 / swift→跳跳 / split→团子 / mimic→果冻 /
 > thief→焦糖 / bomber→爆米 / elite→泡芙 / boss→按关卡为 莓莓(5)/抹茶(10)/云朵(15)/黑森林(20)。
@@ -35,11 +35,11 @@
 | 光照 | 统一左上方柔光源；高光在左上、暗部在右下，所有角色方向一致；不接受逆光或顶光 |
 | 细节密度 | 低-中。缩到 44px 时五官（大眼+腮红）和专属配饰必须清晰；细小花纹会消失故不画 |
 | 相机 | 正交、正面、正面偏俯视 5-10°，无透视畸变；全身入镜，不画地面阴影（运行时程序化画） |
-| 运动 | 待机为轻微呼吸浮动；运行时由代码叠加 squash/stretch、命中闪白、隐身半透明、出生弹出——**精灵必须是静态中性 pose，不要预画动作** |
+| 怪物运动 | 怪物基础精灵使用静态中性姿势，运行时叠加呼吸、挤压、闪白和出生动作。此限制不适用于主角。 |
 
 ## 3. 每角色专属提示词块（生成时替换 CHARACTER_BLOCK）
 
-公共锁定块（每次都带）：
+怪物基础精灵锁定块（不用于主角）：
 ```
 ROLE: production 2D game sprite for a top-down roguelite survivor H5 game.
 VIEW: orthographic front-facing, slight 5-10 degree top-down, full body, centered, feet at bottom edge of canvas.
@@ -52,7 +52,7 @@ EXCLUDE: text, labels, watermark, signature, mockup frame, scenery, duplicate ch
 
 各角色 CHARACTER_BLOCK：
 
-- **player 玩家·星澜小法师**：`青色双马尾小法师少女, teal twin-tail mage girl, NO HAT and NO HOOD, full cute face visible, golden star hair clips, white-and-teal magical-girl short dress, short capelet behind shoulders, glowing cyan magic orb brooch, friendly happy expression, palette teal #54dcff.`
+- **player 玩家·星澜小法师**：见第 5 节。保留青色双马尾、金色星夹、白青短斗篷与星杖；不以缩小的日漫魔法少女立绘充当战斗精灵。
 - **spore 苔姬**：`薄荷绿双马尾少女, mint-green twin-tail girl, RED MUSHROOM CAP with white spots as signature hat, gentle expression, palette mint green #57dc98.`
 - **swift 夜燕**：`紫色长发少女, purple long-haired girl, BAT EARS and small membranous wings as signature, sharp confident eyes, palette purple #b27bff.`
 - **split 绯樱**：`樱粉色双丸子头发型少女, pink twin-bun hair girl, cherry-blossom hair ornaments, cheerful expression, palette cherry pink #ff8fc7.`
@@ -70,3 +70,22 @@ EXCLUDE: text, labels, watermark, signature, mockup frame, scenery, duplicate ch
 - [ ] 真实游戏截图：与深色网格背景对比可读，不糊成一团
 - [ ] 导入后动态叠加（squash/闪白/隐身）不破形
 - [ ] manifest 每条有 source/license，`technical_checks_passed: true`
+
+## 5. 主角：同一角色，两套表现（制作要求，尚未交付）
+
+星澜是大头、圆脸、短四肢的 Q 版小法师。她与怪物共享轮廓语言、光照和配色体系，不共享细节上限或动作模板。大厅和战斗共用一张造型设定稿，锁定头身比例、双马尾外形、星夹位置和杖头轮廓；精致度来自表情、握杖手势、重心和材质，不靠拉长腿或堆叠裙饰。
+
+**大厅**：独立分层立绘，不能放大战斗贴图充数。待机时目光先追随杖尖的星光，眨眼后收杖；呼吸带动肩膀，发束和斗篷稍后落稳。偶发的小动作与安静站姿交替，不让整张图一直上下漂。
+
+**战斗**：制作专属贴图与动作姿势，或能表达同等动作的分层模型。可以共用动画播放器，但不能用怪物的骨骼预设代替主角表演。脚底锚点与碰撞体稳定；移动时能施法，视觉后摇不锁摇杆。
+
+| 动作 | 玩家应能看见什么 |
+|---|---|
+| 待机 | 双脚站稳、持杖戒备；与大厅放松的站姿不同。 |
+| 走路 / 跑步 | 慢走有交替落脚和重心转移；跑步身体前倾、跨步拉开、斗篷拖后。跑不是把走路循环加速。 |
+| 攻击 | 手先收杖，肩肘带动挥杖，杖尖到位时出招，再收势；移动中保留下半身步态。 |
+| 受击 | 命中侧肩膀缩回、身体偏移再站稳；角色反应与护盾、闪白、飘字分开。 |
+| 升级 | 星澜仰头举杖，视线追随汇聚的星光；与选卡界面衔接，不额外延长暂停。 |
+| 胜利 | 停步、举杖庆祝，再把杖抱回胸前微笑；结算面板不抢先盖住关键姿势。 |
+
+**验收顺序**：先并排看大厅立绘和手机战场原尺寸下的星澜、棉棉、跳跳，确认同一画风且主角一眼可辨。再看待机、跑动中施法和受击恢复。最后暂时关闭技能特效、伤害数字与闪白，只看角色本体是否仍能区分攻击、受击、升级和胜利。

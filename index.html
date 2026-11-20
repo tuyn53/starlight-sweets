@@ -14,9 +14,13 @@
   <div class="load-core">
     <img class="load-logo" src="assets/starlight-shard.svg" alt="">
     <h1>甜星大作战</h1>
-    <div class="load-track"><i id="loadFill"></i></div>
-    <p class="load-status" role="status"><span id="loadSub">正在收集星光…</span><b id="loadPct">0%</b></p>
-    <button id="loadStart" class="btn hidden" type="button">进入星光岛 <span aria-hidden="true">→</span></button>
+    <div class="load-slot">
+      <div class="load-meter">
+        <div class="load-track"><i id="loadFill"></i></div>
+        <p class="load-status" role="status"><span id="loadSub">正在收集星光…</span><b id="loadPct">0%</b></p>
+      </div>
+      <button id="loadStart" class="btn hidden" type="button">进入星光岛 <span aria-hidden="true">→</span></button>
+    </div>
   </div>
 </div>
 
@@ -146,8 +150,7 @@
 </div>
 
 <div id="sceneTransition" class="hidden" aria-hidden="true">
-  <div class="scene-iris"></div>
-  <img class="scene-spark" src="assets/starlight-shard.svg" alt="">
+  <div class="scene-wrap"><img class="scene-spark" src="assets/starlight-shard.svg" alt=""></div>
 </div>
 
 <div id="levels" class="screen hidden">

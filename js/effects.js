@@ -77,23 +77,66 @@ function crystalBloom(x,y,r,p,rank,pal,petals){
   }
   ctx.restore();
 }
+function drawStarburst(f,rank){
+  const p=1-f.life/f.max, R=f.R, count=7+rank*2;
+  ctx.save(); ctx.translate(f.x,f.y);
+  // 主锋抢先炸开，尾端稍后追上，最后只剩脱离主锋的碎屑。
+  for(let i=0;i<count;i++){
+    const q=clamp((p-(i%3)*.025)/.92,0,1);
+    if(q<=0||q>=1) continue;
+    const length=R*(i%2?.73:1), head=length*(1-(1-q)**4);
+    const foot=length*(1-(1-q)**1.65), breadth=(7+4*rank)*Math.sin(Math.PI*q)**.6;
+    ctx.save();ctx.rotate(i*TAU/count+.24);
+    ctx.beginPath();ctx.moveTo(foot,0);ctx.lineTo(foot+(head-foot)*.35,-breadth);
+    ctx.lineTo(head,0);ctx.lineTo(foot+(head-foot)*.18,breadth*.5);ctx.closePath();
+    ctx.fillStyle=i%2?'#ffd27c':'#ff8bb1';ctx.fill();ctx.strokeStyle='#a24664';ctx.lineWidth=1.3;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(foot,0);ctx.lineTo(foot+(head-foot)*.38,-breadth*.74);
+    ctx.lineTo(head,0);ctx.closePath();ctx.fillStyle='#fff2ca';ctx.fill();
+    if(q>.28 && q<.92) cutGem(head*.88,-breadth-8*q,.35+q,5*(1-q)+2,2,CANDY_GLASS.rose);
+    ctx.restore();
+  }
+  if(p<.5){
+    const kick=Math.sin(Math.PI*(.15+.85*p/.5));
+    star(0,0,55*kick,'#d84b81',8,.32,.24,true);
+    star(0,0,39*kick,'#ffe39b',8,.34,.24);
+  }
+  ctx.restore();
+}
+
+function drawTide(f,p,rank){
+  const R=f.size/2.8;
+  ctx.save();ctx.translate(f.x,f.y);
+  for(let band=0;band<2;band++){
+    const q=clamp((p-band*.18)/(1-band*.18),0,1);
+    if(q<=0||q>=1) continue;
+    const r=R*(.08+.92*(1-(1-q)**2.5))*(band?.86:1);
+    const swell=(band?10:20)*Math.sin(Math.PI*q)**.75;
+    const n=6+rank, step=TAU/n;
+    for(let i=0;i<n;i++){
+      ctx.save();ctx.rotate(i*step+band*.32+q*.12);
+      const end=step*(.98-.42*q), x=r*Math.cos(end), y=r*Math.sin(end);
+      ctx.beginPath();ctx.moveTo(r-swell,0);
+      ctx.quadraticCurveTo(r+swell*.38,r*end*.32,x,y);
+      ctx.quadraticCurveTo(x+swell*.68,y-swell*.75,x-swell*.08,y-swell);
+      ctx.quadraticCurveTo(x-swell*.5,y-swell*1.2,x-swell*.65,y-swell*.4);
+      ctx.quadraticCurveTo(r-swell,r*end*.28,r-swell,0);
+      ctx.fillStyle=band?'#85dbdf':'#41b6ce';ctx.fill();ctx.strokeStyle='#38788e';ctx.lineWidth=1;ctx.stroke();
+      ctx.beginPath();ctx.moveTo(r-swell*.35,r*end*.16);
+      ctx.quadraticCurveTo(r+swell*.14,r*end*.46,x,y);
+      ctx.strokeStyle='#e6fff3';ctx.lineWidth=1+swell*.19;ctx.stroke();
+      if(!band && q>.18 && q<.85){
+        ctx.fillStyle='#d9fff6';ctx.beginPath();ctx.ellipse(x+swell*.55,y-4,2+swell*.14,2,end,0,TAU);ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
 function drawCastMotion(f,p){
   const pal=CANDY_GLASS, rank=skillRank(f.key);
   if(f.key==='wave'||f.key==='mine'){
     if(f.key==='mine') crystalBloom(f.x,f.y,f.size/2.9,p,rank,pal.honey,6+rank*2);
-    else {
-      const r=f.size/2.8*(.16+.84*(1-(1-p)**3));
-      ctx.save(); ctx.translate(f.x,f.y);
-      for(let i=0;i<5+rank;i++){
-        const a=i*TAU/(5+rank)+p*.5;
-        ctx.beginPath(); ctx.arc(0,0,r,a,a+.64*(1-p)+.04);
-        ctx.arc(0,0,Math.max(1,r-5*(1-p)),a+.45*(1-p),a,true);
-        ctx.closePath(); ctx.fillStyle=pal.sky[1]; ctx.fill();
-        ctx.strokeStyle=pal.sky[0]; ctx.lineWidth=1; ctx.stroke();
-        if(rank>1) cutGem(Math.cos(a)*r,Math.sin(a)*r,a+.9,4,2,pal.sky);
-      }
-      ctx.restore();
-    }
+    else drawTide(f,p,rank);
     return true;
   }
   if(f.key!=='beam' && f.key!=='chain') return false;
