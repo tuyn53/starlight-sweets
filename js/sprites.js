@@ -3,7 +3,14 @@
 const SPRITES = {};
 const BATTLE_SPRITES = {};
 const SPRITE_SRC = {
-  player:'assets/characters/player-star.webp',
+  player:'assets/characters/xinglan/idle.webp',
+  rest:'assets/characters/xinglan/rest.webp',
+  step:'assets/characters/xinglan/step.webp',
+  run:'assets/characters/xinglan/run.webp',
+  ready:'assets/characters/xinglan/ready.webp',
+  cast:'assets/characters/xinglan/cast.webp',
+  recoil:'assets/characters/xinglan/recoil.webp',
+  cheer:'assets/characters/xinglan/cheer.webp',
   spore :'assets/characters/spore-star.webp',
   swift :'assets/characters/swift-star.webp',
   split :'assets/characters/split-star.webp',
@@ -25,6 +32,7 @@ const SPRITE_SRC = {
   'millefeuille':'assets/characters/millefeuille-star.webp',
   'frost-emperor':'assets/characters/frost-emperor-star.webp',
 };
+const heroArtKeys=new Set(Object.keys(SPRITE_SRC).filter(k=>SPRITE_SRC[k].includes('/xinglan/')));
 let spritesReady = false;
 
 function loadSprites(onDone, onProgress){
@@ -67,8 +75,9 @@ function drawSprite(k, x, y, h, opts){
   const sx=o.sx===undefined?1:o.sx, sy=o.sy===undefined?1:o.sy;
   const alpha=o.alpha===undefined?1:o.alpha;
   const bob=o.bob||0;
-  const drawH=h/0.92, drawW=drawH*(im.naturalWidth/im.naturalHeight);
-  const dx=x-drawW/2, dy=y-drawH*0.98+bob;
+  const hero=heroArtKeys.has(k);
+  const drawH=h/(hero?.74:.92), drawW=drawH*(im.naturalWidth/im.naturalHeight);
+  const dx=x-drawW/2, dy=y-drawH*(hero?.935:.98)+bob;
   c.save();
   c.globalAlpha=alpha;
   if(sx!==1||sy!==1||o.flipX){ c.translate(x,y+bob); c.scale(sx*(o.flipX?-1:1),sy); c.translate(-x,-(y+bob)); }

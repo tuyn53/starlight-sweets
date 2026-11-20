@@ -437,5 +437,21 @@ ok('黑森林第三阶段单束、狂暴双束共用伤害标记',run(`(()=>{
     lasers[0].color!==lasers[1].color;
 })()`));
 
+ok('星澜按移动、施法、受击、升级和通关切换独立原画',run(`(()=>{
+  startLevel(1);
+  player.walk=0; player.moveAmount=.3;
+  if(playerArtFrame(1,0)!=='step') return false;
+  player.moveAmount=1;
+  if(playerArtFrame(1,0)!=='run') return false;
+  Rig.startCast(player,1,0);
+  if(playerArtFrame(1,0)!=='ready' || playerArtFrame(1.1,0)!=='cast') return false;
+  hurtPlayer(1);
+  if(playerArtFrame(game.time,0)!=='recoil') return false;
+  game.state='levelup'; game.cardMode='level'; player.promotedAt=100;
+  if(playerArtFrame(1,420)!=='cheer' || playerArtFrame(1,1500)!=='player') return false;
+  game.state='clear'; player.wonAt=100;
+  return playerArtFrame(1,1500)==='cheer';
+})()`));
+
 console.log(`\n===== 结果: ${pass} 通过 / ${fail} 失败 =====`);
 process.exit(fail?1:0);

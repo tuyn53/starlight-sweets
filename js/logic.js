@@ -342,6 +342,7 @@ function hurtPlayer(dmg,source){
     player.shieldHitAt=game.time;
     player.shieldAngle=source?Math.atan2(source.y-player.y,source.x-player.x):Math.atan2(player.faceY,player.faceX);
   }
+  player.hurtAt=game.time;
   player.hp-=real; player.invuln=0.65; game.flash=.5; player.sq=1; player.sqT=0.22;
   Juice.feedback('large',player.x,player.y,CFG.ART.boss.main);
   addDmgText(player.x,player.y-player.r-8,real,false,'#ff6f92');
@@ -366,6 +367,7 @@ function updateRunRewards(){
   if(game.state!=='playing' || game.bossIntro || t<game.nextRewardAt) return;
   if(player.level<CFG.LEVEL.playerMax && player.xp>=player.xpNext && t>=game.nextLevelAt){
     player.xp-=player.xpNext; player.level++;
+    player.promotedAt=performance.now();
     player.xpNext=P.xpCosts[player.level-1] ?? 0;
     if(player.level>=CFG.LEVEL.playerMax) player.xp=0;
     let gap=0;
@@ -443,6 +445,7 @@ function update(dt){
     dist2(player.x,player.y,h.x,h.y)<h.r*h.r);
   const speed=player.speed*(slowed?.75:1);
   player.x+=v.x*speed*dt; player.y+=v.y*speed*dt;
+  player.moveAmount=Math.hypot(v.x,v.y);
   Rig.trackWalk(player,Math.hypot(player.x-player.ox,player.y-player.oy),dt,70);
 
   if(game.levelTime>=CFG.LEVEL.bossAt && !game.bossSpawned && !game.bossIntro) beginBossSequence();
@@ -955,6 +958,7 @@ function levelClear(){
   if(cleared>=game.unlocked && cleared<CFG.LEVEL.total){ game.unlocked=cleared+1; saveProgress(); }
   const allDone=cleared>=CFG.LEVEL.total;
   game.state=allDone?'complete':'clear';
+  player.wonAt=performance.now();
   Sound.win();
   // 状态已切换（世界停止推进），结算面板延迟弹出，留出通关庆祝时间
   setTimeout(()=>showResult(true, allDone), 900);

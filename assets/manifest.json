@@ -339,7 +339,7 @@
       "id": "player-star",
       "role": "星光法师",
       "path": "assets/characters/player-star.webp",
-      "status": "shipped",
+      "status": "archived",
       "technical": {
         "dimensions": "512x512",
         "alpha": true,
@@ -352,6 +352,177 @@
         "url_or_tool": "ImageGen",
         "created_at": "2026-11-19",
         "license": "AI-generated, project use"
+      }
+    },
+    {
+      "id": "xinglan-idle",
+      "role": "大厅立绘及战斗待机",
+      "path": "assets/characters/xinglan/idle.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "400x400",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "xinglan-rest",
+      "role": "收杖休息",
+      "path": "assets/characters/xinglan/rest.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "400x400",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "xinglan-step",
+      "role": "迈步",
+      "path": "assets/characters/xinglan/step.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "400x400",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "xinglan-run",
+      "role": "奔跑",
+      "path": "assets/characters/xinglan/run.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "400x400",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "xinglan-ready",
+      "role": "起杖",
+      "path": "assets/characters/xinglan/ready.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "400x400",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "xinglan-cast",
+      "role": "出杖",
+      "path": "assets/characters/xinglan/cast.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "400x400",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "xinglan-recoil",
+      "role": "受击",
+      "path": "assets/characters/xinglan/recoil.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "400x400",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "xinglan-cheer",
+      "role": "升级与通关欢呼",
+      "path": "assets/characters/xinglan/cheer.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "400x400",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "xinglan-portrait",
+      "role": "战斗头像",
+      "path": "assets/characters/xinglan/portrait.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "192x192",
+        "alpha": true
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "ImageGen",
+        "reference": "用户提供的《阳光草地·星法师突围》",
+        "license": "AI-generated, project use"
+      },
+      "qa": {
+        "technical_checks_passed": true
       }
     },
     {

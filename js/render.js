@@ -611,6 +611,26 @@ function drawExpansionGround(){
   }
 }
 
+// 星澜的主动动作使用独立原画；步态跟随移动距离，暂停演出使用界面时钟。
+function playerArtFrame(time, now){
+  const won=game.state==='clear' || game.state==='complete';
+  const promoted=game.state==='levelup' && game.cardMode==='level';
+  if(won || promoted){
+    const age=(now-(won?player.wonAt:player.promotedAt))/1000;
+    if(age<.12) return 'ready';
+    return won || age<.8 ? 'cheer' : 'player';
+  }
+  if(time-(player.hurtAt??-Infinity)<.23 || game.state==='gameover') return 'recoil';
+  const castAge=time-(player.castStarted??-Infinity);
+  if(castAge<.24) return castAge<.065?'ready':'cast';
+  if(player.moveAmount>.02){
+    const stride=(player.walk||0)*9;
+    if(player.moveAmount>.65) return Math.cos(stride)>.05?'run':'step';
+    return Math.cos(stride)>0?'step':'player';
+  }
+  return time%5.4>4.75?'rest':'player';
+}
+
 function drawPlayer(alpha){
   const P=CFG.ART.friend, T=game.time;
   const wp=player.weapons.orbit;
@@ -641,9 +661,13 @@ function drawPlayer(alpha){
   ctx.translate(0,-pose.bob*pose.strength*R);
   ctx.scale(sq.sx,sq.sy);
   const aimSide=Math.cos(pose.cast?.direction);
-  const flipX=Math.abs(aimSide)>.3?aimSide<0:player.faceX<0;
+  const flipX=Math.abs(aimSide)>.3?aimSide>0:player.faceX>0;
   const drawOptions={ctx,alpha:blink?.58:1,flipX};
-  if(!SliceRig.draw('player',0,foot,3.65*R,pose,drawOptions) &&
+  const now=performance.now(), art=playerArtFrame(T,now);
+  const celebrant=art==='cheer';
+  const at=game.state==='levelup'?player.promotedAt:player.wonAt;
+  const lift=celebrant ? Math.sin(Math.PI*clamp((now-at-120)/520,0,1))*R*.8 : 0;
+  if(!drawSprite(art,0,foot-lift,3.65*R,drawOptions) &&
      !drawSprite('player',0,foot,3.65*R,drawOptions)){
     ctx.globalAlpha=drawOptions.alpha;
     // 回退：可爱小法师（无兜帽，双马尾）

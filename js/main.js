@@ -41,18 +41,22 @@ async function transitionTo(action,origin){
   if(sceneBusy) return;
   sceneBusy=true;
   try {
-    if(prefersReducedMotion() || !sceneWrap.animate){ action(); return; }
+    if(!sceneWrap.animate){ action(); return; }
+    const reduced=prefersReducedMotion();
     const rect=origin?.getBoundingClientRect();
+    const x=rect?clamp(rect.left+rect.width/2,36,innerWidth-36):innerWidth/2;
     const y=rect?clamp(rect.top+rect.height/2,36,innerHeight-36):innerHeight/2;
+    sceneLayer.style.setProperty('--scene-x',x+'px');
     sceneLayer.style.setProperty('--scene-y',y+'px');
     sceneLayer.classList.remove('hidden');
-    const cover=sceneWrap.animate([{transform:'translateX(-100%)'},{transform:'none'}],
-      {duration:185,easing:'cubic-bezier(.35,.02,.28,1)',fill:'forwards'});
+    const cover=sceneWrap.animate([{opacity:0},{opacity:1}],
+      {duration:reduced?100:310,easing:'ease-in-out',fill:'forwards'});
     await cover.finished;
     action();
     render(0);
-    const reveal=sceneWrap.animate([{transform:'none'},{transform:'translateX(100%)'}],
-      {duration:225,easing:'cubic-bezier(.44,0,.24,1)',fill:'forwards'});
+    // 两段之间保持完全遮盖；新场景首帧和首页角色可以先在幕下落位。
+    const reveal=sceneWrap.animate([{opacity:1},{opacity:0}],
+      {delay:reduced?0:45,duration:reduced?140:405,easing:'ease-in-out',fill:'both'});
     cover.cancel();
     await reveal.finished;
   } finally {
@@ -327,7 +331,8 @@ function drawHome(now){
     const cw=w/dpr, ch=h/dpr;
     const drawH = ch * 0.94;
     const lift = prefersReducedMotion() ? 0 : Math.sin(T*2+r.phase)*4;
-    if(!drawSprite(r.kind, cw/2, ch*0.97, Math.min(drawH, cw*1.12), {ctx:r.ctx, bob:lift})){
+    const art=r.kind==='player' && !prefersReducedMotion() && T%5.4>4.55 ? 'rest' : r.kind;
+    if(!drawSprite(art, cw/2, ch*0.97, Math.min(drawH, cw*1.12), {ctx:r.ctx, bob:lift})){
       Rig.draw(r.kind,cw/2,ch*.97,drawH,Rig.sample(r.pose,T,r.phase),{ctx:r.ctx,T});
     }
   }

@@ -104,16 +104,21 @@ svg { display: block; }
   position: fixed; inset: 0; z-index: 25; overflow: hidden; pointer-events: all;
 }
 .scene-wrap {
-  position: absolute; inset: 0 -12%; pointer-events: none; transform: translateX(-100%);
-  clip-path: polygon(0 0, 92% 0, 100% 100%, 8% 100%);
-  background: repeating-linear-gradient(64deg, #fff2d7 0 32px, #ffeace 32px 64px);
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse farthest-corner at var(--scene-x,50%) var(--scene-y,50%),
+    #fff6dc 0%, #f7e4d7 52%, #e9cfd8 100%);
 }
-.scene-wrap::before, .scene-wrap::after {
-  content: ''; position: absolute; inset: 0; background: #eaa0ad;
-  clip-path: polygon(0 0, 1.5% 0, 9.5% 100%, 8% 100%);
+.scene-spark {
+  position: absolute; left: var(--scene-x,50%); top: var(--scene-y,50%);
+  width: clamp(32px, 4vw, 46px); transform: translate(-50%,-50%);
 }
-.scene-wrap::after { transform: rotate(180deg); }
-.scene-spark { position: absolute; left: 50%; top: var(--scene-y,50%); width: clamp(42px,7vw,68px); transform: translate(-50%,-50%); }
+@media (prefers-reduced-motion: no-preference) {
+  #sceneTransition:not(.hidden) .scene-spark { animation: scene-glimmer .76s ease-out both; }
+}
+@keyframes scene-glimmer {
+  from { transform: translate(-50%,-50%) rotate(-12deg) scale(.78); }
+  to { transform: translate(-50%,-50%) rotate(4deg) scale(1.06); }
+}
 @keyframes float { 50% { transform: translateY(-7px); } }
 
 .home-shell {
@@ -183,7 +188,7 @@ svg { display: block; }
   background: var(--hud-candy); box-shadow: var(--hud-shadow), inset 0 0 0 2px #fff8e9;
 }
 .hud-portrait { position: absolute; inset: 2px; border-radius: inherit; overflow: hidden; background: radial-gradient(#fffcf2, #e9cdf6); }
-.hud-portrait img { position: absolute; width: 180%; max-width: none; left: -31%; top: -4%; }
+.hud-portrait img { position: absolute; width: 100%; height: 100%; object-fit: cover; inset: 0; }
 .hud-lv {
   position: absolute; bottom: -2px; right: -6px; display: grid; grid-auto-flow: column; place-content: center;
   min-width: 25px; aspect-ratio: 1; padding: 0 3px;
