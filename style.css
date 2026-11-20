@@ -71,48 +71,31 @@ svg { display: block; }
   overflow: auto; z-index: 7; text-align: center; background: #fff5eb;
 }
 .screen, #loading, .settings-overlay { touch-action: pan-y; overscroll-behavior: contain; }
-.story-sky {
-  background: #fff0dc url("assets/starlight-island.webp") center bottom / cover no-repeat;
-}
-.story-sky::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(circle, #fffaf2 0 1.4px, transparent 1.7px) 12px 4px / 40px 40px;
-  mask-image: linear-gradient(#0009, transparent 74%);
-}
 #loading {
   z-index: 20;
+  isolation: isolate;
   display: grid;
-  grid-template: "title" minmax(max-content, 28%) "hero" minmax(116px, 1fr) "entry" auto / minmax(0, 1fr);
+  grid-template: "title" 24% "." 1fr "entry" auto / minmax(0, 1fr);
   justify-items: center;
   align-items: center;
-  justify-content: center;
   gap: 0;
-  padding: max(20px, var(--top)) max(24px, var(--right)) max(7svh, var(--bottom)) max(24px, var(--left));
-  background: linear-gradient(180deg, transparent 46%, #42264740 65%, #321c3c 94%),
-    #ffe9d6 url("assets/starlight-island.webp") center bottom / cover no-repeat;
+  padding: max(18px, var(--top)) max(24px, var(--right)) max(5svh, var(--bottom)) max(24px, var(--left));
+  background: #19163d;
+}
+.load-art {
+  position: absolute; z-index: -1; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; object-position: center;
 }
 .load-title {
   grid-area: title;
   align-self: end;
-  z-index: 1;
-  padding-block-end: 8px;
-  font-size: clamp(48px, min(17vw, 10svh), 92px);
-  line-height: .97;
-  color: #63386b;
-  paint-order: stroke fill;
-  -webkit-text-stroke: .09em #fff6e5;
-  filter: drop-shadow(0 5px 0 #b87689) drop-shadow(0 10px 15px #783f6540);
+  font-size: clamp(39px, min(13vw, 8svh), 86px);
+  line-height: .98;
+  color: #fff2d3;
+  text-shadow: 0 3px 0 #623f74, 0 6px 18px #151034;
 }
-.load-title span { display: table; position: relative; margin: 0 auto; font-size: .78em; color: #a42d62; }
-.load-title img { position: absolute; width: .68em; inset: -.13em auto auto calc(100% + .1em); transform: rotate(11deg); }
-.load-hero {
-  grid-area: hero;
-  width: min(100%, 440px);
-  height: 100%;
-  min-height: 0;
-  object-fit: contain;
-  filter: drop-shadow(0 16px 14px #46254d55);
-}
+.load-title span { display: table; position: relative; margin: 0 auto; font-size: .75em; color: #ffd487; }
+.load-title img { position: absolute; width: .58em; inset: -.08em auto auto calc(100% + .14em); transform: rotate(11deg); }
 .load-slot { grid-area: entry; width: min(100%, 330px); min-height: 80px; display: grid; place-items: center; }
 .load-slot > * { grid-area: 1 / 1; }
 .load-meter { width: 100%; display: grid; gap: 8px; }
@@ -136,20 +119,16 @@ svg { display: block; }
 .load-status, .load-tip { color: #fff7e9; font-size: 13px; text-shadow: 0 1px 4px #28182e; }
 .load-status { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
 .load-tip { color: #ffe3d5; }
-@media (orientation: portrait) {
-  .load-hero { transform: translateY(-2svh); }
-}
 @media (orientation: landscape) {
   #loading {
-    grid-template: "title hero" 1fr "entry hero" 1fr / minmax(0, 365px) minmax(0, 480px);
-    column-gap: clamp(12px, 6vw, 96px);
-    row-gap: clamp(12px, 6svh, 56px);
-    background-image: linear-gradient(180deg, transparent 55%, #42264738), url("assets/starlight-island.webp");
+    grid-template: "title ." 1fr "entry ." 1fr / minmax(0, 44%) 1fr;
+    padding-inline: clamp(20px, 6vw, 100px);
+    background: linear-gradient(90deg, #19163d 35%, #19163d00 80%);
   }
-  .load-title { font-size: clamp(42px, min(9vw, 17svh), 96px); }
-  .load-slot { align-self: start; }
-  .load-meter { padding: 10px 14px; background: #45284e; border-radius: 14px; }
-  .load-hero { width: 100%; }
+  .load-art { z-index: -2; left: auto; width: 65%; object-position: 50% 47%; }
+  #loading::before { content: ""; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, #19163d 34%, #19163d00 62%); }
+  .load-title { font-size: clamp(38px, min(8vw, 14svh), 96px); }
+  .load-slot { align-self: center; }
 }
 #sceneTransition {
   position: fixed; inset: 0; z-index: 25; overflow: hidden; pointer-events: all;
@@ -170,40 +149,45 @@ svg { display: block; }
   from { transform: translate(-50%,-50%) rotate(-12deg) scale(.78); }
   to { transform: translate(-50%,-50%) rotate(4deg) scale(1.06); }
 }
-@keyframes float { 50% { transform: translateY(-7px); } }
 
+#menu {
+  padding: max(48px, var(--top)) var(--right) max(14px, var(--bottom)) var(--left);
+  background: linear-gradient(180deg, #19163d22 18%, transparent 48%, #14162cd9 100%),
+    #19163d url("assets/entry/lobby-valley.webp") 50% 58% / cover no-repeat;
+}
 .home-shell {
-  position: relative; width: min(1080px, 100%); display: grid; grid-template-columns: 1fr 1.18fr;
-  align-items: center; gap: clamp(8px, 4vw, 66px);
+  width: min(980px, 100%);
+  min-height: min(76svh, 720px);
+  display: grid;
+  grid-template: "title hero" 1fr "actions hero" 1fr / 1fr 1.1fr;
+  align-items: center;
+  gap: clamp(10px, 3vw, 44px);
 }
-.home-copy { text-align: left; display: grid; justify-items: start; gap: 16px; }
-.wordmark { font-size: 11px; letter-spacing: .28em; font-weight: 900; color: #70415e; }
-#gameTitle { font-size: clamp(46px, 7.2vw, 108px); color: var(--berry); text-shadow: 0 4px #fff9ef; }
-#gameTitle span { display: block; color: #4d385c; }
-.home-tagline { color: var(--muted); max-width: 22em; }
-.home-play { display: flex; align-items: center; gap: 13px; min-width: min(100%, 245px); text-align: left; padding: 10px 14px; }
-.home-play img { width: 41px; padding: 4px; border-radius: 11px; background: #fff3ce; }
-.play-copy { flex: 1; display: grid; line-height: 1.24; }
-.play-copy strong { font-size: 19px; }
-.play-copy small { color: #fff0f7; font-size: 12px; margin-top: 4px; }
-#menuProgress { font-size: 12px; color: var(--muted); }
-.hero-area {
-  position: relative; isolation: isolate; width: 100%; height: min(61vh, 540px);
-  min-height: 210px; border-radius: 50% 50% 30% 30%;
-  background: radial-gradient(ellipse at 45% 32%, #fffdf2, #f8cadd 61%, #e4abd0);
-  border: 3px solid #fffbf1; box-shadow: 0 0 0 1px #e7bdcf, 0 24px 60px #79486726;
+.home-copy { grid-area: title; align-self: end; text-align: left; }
+#gameTitle {
+  font-size: clamp(44px, 7.5vw, 98px);
+  line-height: 1.04;
+  color: #ffd68d;
+  text-shadow: 0 3px #6a407a, 0 10px 28px #171233;
 }
-.hero-orbit { position: absolute; inset: 7%; border: 1px dashed #a35f9069; border-radius: inherit; pointer-events: none; }
+#gameTitle span { display: block; color: #fff1d4; }
+.home-actions { grid-area: actions; align-self: start; justify-self: start; display: grid; gap: 11px; width: min(100%, 290px); }
+.home-play {
+  display: flex; align-items: center; gap: 13px; width: 100%; min-height: 54px; padding: 8px 14px;
+  color: #281d47; background: linear-gradient(180deg, #fff0b5, #efba70); border-color: #ffe4ab;
+  box-shadow: 0 4px #885c72, 0 9px 22px #14102d99;
+}
+.home-play img { width: 34px; }
+.play-copy { flex: 1; text-align: left; font-size: 19px; }
+#menuProgress { font-size: 12px; font-weight: 700; color: #fff0da; text-shadow: 0 1px 6px #14162c; }
+.hero-area { grid-area: hero; position: relative; min-width: 0; display: grid; place-items: center; isolation: isolate; }
 .hero-area::after {
-  content: ""; position: absolute; z-index: -1; left: 7%; right: 7%; bottom: 8%; height: 20%;
-  border-radius: 50%; border: 2px solid #fff9ea; background: #a2d9bc; box-shadow: inset 0 -9px #52978636;
+  content: ""; position: absolute; z-index: -1; bottom: 3%;
+  width: 48%; height: 10%; border-radius: 50%;
+  background: radial-gradient(ellipse, #1f172984 12%, transparent 72%);
 }
-.hero-character { position: absolute; inset: 4% 10% 13%; }
-.rig-canvas { display: block; width: 100%; height: 100%; }
-.companion { position: absolute; bottom: 9%; width: 25%; height: 31%; }
-.companion-left { left: 2%; }
-.companion-right { right: 2%; }
-.companion figcaption { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 12px; border-radius: 99px; background: var(--cream); padding: 2px 10px; border: 1px solid var(--edge); }
+.hero-character { display: block; width: min(100%, 400px, 66svh); }
+.hero-character img { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 14px #ebc3ff55); }
 
 #levels { background: linear-gradient(#fff9e8ad, #fff7ec59), #ffe9d6 url("assets/starlight-island.webp") center bottom / cover; }
 .sub, .hint { color: var(--muted); }
@@ -486,22 +470,24 @@ body:has(#levelup:not(.hidden):not(.is-peeking)) #toast { visibility: hidden; }
   .card:hover { transform: translateY(-4px); border-color: var(--card-ink); }
 }
 @media (pointer: coarse) { .card .ck { display: none; } }
-@media (max-width: 640px) and (orientation: portrait) {
-  .home-shell { width: min(100%, 450px); grid-template-columns: 1fr; gap: 17px; }
-  .home-copy { text-align: center; justify-items: center; gap: 10px; display: contents; }
-  .wordmark, #gameTitle, .home-tagline, .home-play, #menuProgress { justify-self: center; }
-  #gameTitle { text-align: center; font-size: clamp(42px, 11vw, 69px); }
+@media (orientation: portrait) {
+  .home-shell {
+    width: min(100%, 470px);
+    min-height: min(82svh, 800px);
+    grid-template: "title" auto "hero" 1fr "actions" auto / minmax(0, 1fr);
+    justify-items: center;
+    gap: clamp(8px, 2svh, 18px);
+  }
+  .home-copy { text-align: center; align-self: center; }
+  #gameTitle { font-size: clamp(36px, 11vw, 64px); }
   #gameTitle span { display: inline; }
-  .home-tagline { font-size: 13px; }
-  .hero-area { grid-row: 4; width: 90%; justify-self: center; height: min(42vh, 335px); }
-  .home-play { width: 90%; }
+  .hero-area { align-self: end; width: 100%; }
+  .hero-character { width: min(85%, 385px, 49svh); }
+  .home-actions { justify-self: center; align-self: end; }
 }
 @media (max-height: 470px) and (orientation: landscape) {
-  .home-shell { padding-inline: 48px; }
-  .home-copy { gap: 7px; }
-  #gameTitle { font-size: clamp(40px, 7vw, 65px); }
-  #gameTitle span { display: inline; }
-  .hero-area { height: 62vh; }
+  .home-shell { padding-inline: 34px; }
+  #gameTitle { font-size: clamp(33px, 6vw, 65px); }
   #levels { gap: 7px; padding-top: 10px; }
   #levelGrid { max-width: 445px; gap: 5px; }
   .lv { min-height: 40px; aspect-ratio: auto; }

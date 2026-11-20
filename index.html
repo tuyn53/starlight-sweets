@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#bdeaff">
+<meta name="theme-color" content="#19163d">
 <title>甜星大作战 · SWEET STAR BLITZ</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,7 @@
 
 <div id="loading" aria-label="游戏入口">
   <h1 class="load-title"><span>甜星<img src="assets/starlight-shard.svg" alt=""></span>大作战</h1>
-  <img class="load-hero" src="assets/characters/xinglan/ready.webp" alt="" width="400" height="400" fetchpriority="high">
+  <img class="load-art" src="assets/entry/loading-battle.webp" alt="" width="960" height="1440" fetchpriority="high">
   <div class="load-slot">
     <div class="load-meter" id="loadMeter">
       <p class="load-status"><span>正在加载游戏资源</span><b id="loadPct" aria-hidden="true">0%</b></p>
@@ -124,29 +124,25 @@
   <div class="bar boss"><i id="bossFill"></i></div>
 </div>
 
-<div id="menu" class="screen home-screen story-sky">
-  <main class="home-shell">
-    <section class="home-copy" aria-labelledby="gameTitle">
-      <div class="wordmark" lang="en">SWEET STAR BLITZ</div>
+<div id="menu" class="screen home-screen">
+  <main class="home-shell" aria-labelledby="gameTitle">
+    <header class="home-copy">
       <h1 id="gameTitle">甜星<span>大作战</span></h1>
-      <p class="home-tagline">在星光岛收集星星，把小小的魔法变成自己的打法。</p>
+    </header>
+    <div class="hero-area">
+      <picture class="hero-character">
+        <source media="(prefers-reduced-motion: reduce)" srcset="assets/entry/lobby-still.webp">
+        <img src="assets/entry/lobby-idle.webp" width="322" height="319" alt="紫星法师星澜握着星杖">
+      </picture>
+    </div>
+    <div class="home-actions">
       <button class="btn home-play" id="startBtn" type="button">
         <img src="assets/starlight-shard.svg" alt="">
-        <span class="play-copy"><strong>开始冒险</strong><small>选择冒险关卡</small></span>
+        <span class="play-copy"><strong>开始冒险</strong></span>
         <span aria-hidden="true">→</span>
       </button>
       <p id="menuProgress"></p>
-    </section>
-    <section class="hero-area" aria-label="星光法师和甜点伙伴">
-      <div class="hero-orbit" aria-hidden="true"></div>
-      <div class="hero-character"><canvas class="rig-canvas" data-kind="player" data-pose="idle" aria-label="星澜，紫星法师"></canvas></div>
-      <figure class="companion companion-left">
-        <canvas class="rig-canvas" data-kind="spore" data-pose="idle" aria-hidden="true"></canvas><figcaption>棉棉</figcaption>
-      </figure>
-      <figure class="companion companion-right">
-        <canvas class="rig-canvas" data-kind="split" data-pose="idle" aria-hidden="true"></canvas><figcaption>团子</figcaption>
-      </figure>
-    </section>
+    </div>
   </main>
 </div>
 

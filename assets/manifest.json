@@ -3,6 +3,74 @@
   "art_direction_brief": "docs/art-direction-brief.md",
   "assets": [
     {
+      "id": "loading-battle",
+      "role": "加载页战斗插画",
+      "path": "assets/entry/loading-battle.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "960x1440",
+        "alpha": false
+      },
+      "source": {
+        "url_or_tool": "ImageGen，星澜角色设计作为参考",
+        "license": "Project use"
+      },
+      "verification": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "lobby-valley",
+      "role": "大厅月夜山谷",
+      "path": "assets/entry/lobby-valley.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "960x1440",
+        "alpha": false
+      },
+      "source": {
+        "url_or_tool": "ImageGen",
+        "license": "Project use"
+      },
+      "verification": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "lobby-idle",
+      "role": "大厅星澜循环待机",
+      "path": "assets/entry/lobby-idle.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "288x285",
+        "alpha": true
+      },
+      "source": {
+        "url_or_tool": "星澜立绘，经连续网格形变生成 42 帧",
+        "license": "Project use"
+      },
+      "verification": {
+        "technical_checks_passed": true
+      }
+    },
+    {
+      "id": "lobby-still",
+      "role": "大厅减少动态效果静帧",
+      "path": "assets/entry/lobby-still.webp",
+      "status": "shipped",
+      "technical": {
+        "dimensions": "322x319",
+        "alpha": true
+      },
+      "source": {
+        "url_or_tool": "大厅待机首帧",
+        "license": "Project use"
+      },
+      "verification": {
+        "technical_checks_passed": true
+      }
+    },
+    {
       "id": "player-idle",
       "role": "player base pose",
       "path": "assets/characters/player.png",

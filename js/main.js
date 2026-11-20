@@ -15,9 +15,6 @@ function frame(now){
   } else if(Juice.stop>0){ /* hit-stop：冻结世界推进，仍渲染打击帧 */ }
   else acc=0;
   render(game.state==='levelup'?1:game.state==='playing'?clamp(acc/CFG.STEP,0,1):0);
-  // 首页骨骼动画并入同一 rAF：仅在菜单可见且加载层已收场时绘制，
-  // 加载阶段不白画（被加载层遮住），也不读 DOM 布局属性（避免强制重排）。
-  if(homeRigs.length && VIS.menu && loadLayer.classList.contains('done')) drawHome(now);
   requestAnimationFrame(frame);
 }
 
@@ -29,9 +26,7 @@ function refreshMenuProgress(){
   const total=CFG.LEVEL.total;
   document.getElementById('menuProgress').textContent=`冒险进度 · 已解锁 ${game.unlocked} / ${total} 关`;
   const strong=document.querySelector('#startBtn .play-copy strong');
-  const small=document.querySelector('#startBtn .play-copy small');
   if(strong) strong.textContent=game.unlocked>1?'继续冒险':'开始冒险';
-  if(small) small.textContent=game.unlocked>1?`已解锁第 ${game.unlocked} 关`:'选择冒险关卡';
 }
 
 const sceneLayer=document.getElementById('sceneTransition');
@@ -283,39 +278,3 @@ Promise.all([
   new Promise(resolve=>loadSprites(resolve,updateBootProgress)),
 ]).then(finishLoading);
 requestAnimationFrame(frame);
-
-// === 大厅角色待机 ===
-const homeRigs = Array.prototype.map.call(document.querySelectorAll('.rig-canvas'), cv => {
-  const fit = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = cv.clientWidth || 120, h = cv.clientHeight || 120;
-    if (cv.width !== Math.floor(w*dpr) || cv.height !== Math.floor(h*dpr)) {
-      cv.width = Math.floor(w*dpr); cv.height = Math.floor(h*dpr);
-    }
-    return dpr;
-  };
-  const rig={cv,ctx:cv.getContext('2d'),kind:cv.dataset.kind,pose:cv.dataset.pose,phase:Math.random()*3,dpr:fit()};
-  new ResizeObserver(()=>{rig.dpr=fit();}).observe(cv);
-  return rig;
-});
-// 由主循环的单一 rAF 调用（见 frame），不再自启 rAF。
-// 每个 rig 用各自的局部 ctx，Rig.draw 的 o.ctx 只临时切换、draw 结束立即交还主 ctx，
-// 不再每帧做 getElementById + getContext 查询（原实现的强制 DOM 访问 + 全局 ctx 争抢）。
-function drawHome(now){
-  const T = now/1000;
-  for (const r of homeRigs) {
-    const dpr = r.dpr;
-    const w = r.cv.width, h = r.cv.height;
-    r.ctx.setTransform(1,0,0,1,0,0);
-    r.ctx.clearRect(0,0,w,h);
-    r.ctx.setTransform(dpr,0,0,dpr,0,0);
-    const cw=w/dpr, ch=h/dpr;
-    const drawH = ch * 0.94;
-    const lift = prefersReducedMotion() ? 0 : Math.sin(T*2+r.phase)*4;
-    const art=r.kind==='player' && !prefersReducedMotion() && T%5.4>4.55 ? 'rest' : r.kind;
-    if(!drawSprite(art, cw/2, ch*0.97, Math.min(drawH, cw*1.12), {ctx:r.ctx, bob:lift})){
-      Rig.draw(r.kind,cw/2,ch*.97,drawH,Rig.sample(r.pose,T,r.phase),{ctx:r.ctx,T});
-    }
-  }
-  Rig.setCtx(ctx);  // 交还主画布上下文（用 core.js 已缓存的 ctx，不再每帧查询 DOM）
-}
