@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
+  <title>甜星大作战 · 渲染对照</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #382a47; background: #d9c9ef; font: 15px/1.5 system-ui, sans-serif; }
+    canvas { display: block; }
+    #game, #phaser { position: fixed; inset: 0; }
+    main { position: fixed; z-index: 1; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px;
+      max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow: auto;
+      padding: 12px; border-radius: 12px; background: #f1e8fb; border: 1px solid #b8a1d3; }
+    h1 { margin: 0 0 6px; font-size: 18px; }
+    p { margin: 6px 0; }
+    button { min-height: 44px; font: inherit; color: #382a47; background: #e3d3f4;
+      border: 1px solid #a589c6; border-radius: 6px; }
+    button:disabled { color: #665476; background: #e9def3; }
+    button:focus-visible { outline: 2px solid #654488; outline-offset: 2px; }
+    output { display: block; white-space: pre-line; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="phaser" hidden></div>
+  <div id="hud" hidden></div>
+  <div id="settingsBtn" hidden></div>
+  <div id="toast" hidden></div>
+  <main>
+    <h1>甜星大作战 · 渲染对照</h1>
+    <p>五种满级武器对战持续补充的混合怪潮。预热 2 秒后采样 12 秒，请保持页面在前台。</p>
+    <p>两种 Phaser 模式使用相同的简化画面，现版模式保留完整战斗特效。</p>
+    <button data-mode="original" disabled>现版 Canvas 2D</button>
+    <button data-mode="canvas" disabled>Phaser Canvas</button>
+    <button data-mode="webgl" disabled>Phaser WebGL</button>
+    <output id="status" aria-live="polite">正在加载角色素材…</output>
+    <div id="results"></div>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/rig.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/slicerig.js"></script>
+  <script src="js/effects.js"></script>
+<script src="js/expansion.js"></script>
+<script src="js/logic.js"></script>
+  <script src="js/tilemap.js"></script>
+  <script src="js/render.js"></script>
+  <script src="scripts/phaser-benchmark.js"></script>
+</body>
+</html>

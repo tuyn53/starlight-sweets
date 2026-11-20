@@ -143,6 +143,13 @@ const Sound = (() => {
 const Input = {
   keys:new Set(), joy:{active:false,id:null,ox:0,oy:0,dx:0,dy:0,r:56,x:0,y:0},
   init(){
+    // 首屏会主动聚焦入口；按实际输入方式显示焦点环，兼容外接键盘。
+    const root=document.documentElement;
+    root.classList.toggle('touch-input',matchMedia('(pointer: coarse)').matches);
+    document.addEventListener('pointerdown',e=>{
+      root.classList.toggle('touch-input',e.pointerType==='touch'||e.pointerType==='pen');
+    },{capture:true,passive:true});
+    document.addEventListener('keydown',()=>root.classList.remove('touch-input'),true);
     for(const type of ['selectstart','contextmenu','dragstart']){
       document.addEventListener(type,e=>e.preventDefault());
     }
@@ -185,4 +192,3 @@ const Input = {
     return {x:0,y:0};
   }
 };
-

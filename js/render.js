@@ -25,15 +25,17 @@ function render(alpha){
     ctx.beginPath(); ctx.arc(player.x,player.y,player.pickup,0,TAU); ctx.stroke();
   }
   drawAura();
+  drawExpansionGround();
   drawGems();
   drawChests();
   drawProps();
   drawEnemies(alpha);
   drawAimMarker();
-  drawEBullets();
   drawBullets(alpha);
   drawNova();
   drawLightning();
+  drawBattleMotions();
+  drawEBullets();
   drawLaserFx();
   if(game.bossIntro) drawBossEntrance();
   drawPlayer(alpha);
@@ -220,25 +222,18 @@ function drawAimMarker(){
 // 星辉结界（彩虹星光领域）
 function drawAura(){
   const lv=player.weapons.aura?player.weapons.aura.level:0; if(!lv)return;
-  const R=70+lv*13, t=game.time;
+  const R=(70+lv*13)*areaScale(), t=game.time;
   ctx.save(); ctx.translate(player.x,player.y);
-  const gr=ctx.createRadialGradient(0,0,R*0.2,0,0,R);
-  gr.addColorStop(0,'rgba(255,230,150,0.03)'); gr.addColorStop(0.72,'rgba(255,200,235,0.10)');
-  gr.addColorStop(1,'rgba(180,225,255,0.22)');
-  ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(0,0,R,0,TAU); ctx.fill();
-  // 旋转星光环 + 跳动的星星刻度
-  const rc=['#ffd976','#ffa9cf','#8fd8ff'];
-  for(let ring=0;ring<3;ring++){
-    ctx.strokeStyle=rc[ring]; ctx.globalAlpha=0.5; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.arc(0,0,R*(0.9-ring*0.06),0,TAU); ctx.stroke();
+  const rank=skillRank('aura'), count=4+rank, pal=CANDY_GLASS.mint;
+  ctx.rotate(t*.22);
+  for(let i=0;i<count;i++){
+    ctx.rotate(TAU/count);
+    ctx.beginPath(); ctx.arc(0,0,R,-.22,.22); ctx.strokeStyle=pal[0]; ctx.lineWidth=2; ctx.stroke();
+    cutGem(R,0,Math.PI/2,7,3,pal);
+    if(rank>=2) cutGem(R-6,0,0,3,2,pal);
+    if(rank===3){ ctx.beginPath(); ctx.arc(0,0,R-4,.25,.42); ctx.stroke(); }
   }
-  ctx.globalAlpha=1; ctx.rotate(t*0.6);
-  for(let k=0;k<12;k++){
-    const a=k/12*TAU, pulse=0.6+0.4*Math.sin(t*5+k);
-    ctx.globalAlpha=0.35+0.5*pulse;
-    star(Math.cos(a)*R*0.92, Math.sin(a)*R*0.92, 5*pulse, rc[k%3],4,0.4,a);
-  }
-  ctx.globalAlpha=1; ctx.restore();
+  ctx.restore();
 }
 
 // === Q 版娘化精灵回退绘制（精灵图加载失败时使用；甜系配色）===
@@ -349,20 +344,20 @@ function drawChibi(e,pal,flash){
 
 function drawEnemies(alpha){
   const T=game.time, A=CFG.ART;
-  const palOf={spore:A.slime,swift:A.bat,split:A.pink,mimic:A.cyan,thief:A.orange,bomber:A.red,elite:A.elite,boss:A.boss};
   for(const e of game.enemies){
+    if(e.activateAt>T) continue;
     const x=e.ox+(e.x-e.ox)*alpha, y=e.oy+(e.y-e.oy)*alpha;
-    const pal=palOf[e.type]||A.slime;
+    const pal=A[e.pal]||A.slime;
     const age=T-(e.born||0), spawn=clamp(age/0.35,0,1), pop=easeOutBack(spawn);
     if(x<game.cam.x-160 || x>game.cam.x+VIEW.w+160 || y<game.cam.y-160 || y>game.cam.y+VIEW.h+160) continue;
     const sq=sqScale(e);
     const breath=1+0.04*Math.sin(T*(e.mech==='dash'?9:3)+e.phase);
     const flash=e.hit>0;
-    const big=e.type==='boss'||e.type==='elite';
-    const R=big?e.r:Math.max(22,e.r*1.55);
+    const big=e.type==='boss'||isEliteEnemy(e);
+    const R=big?e.r:Math.max(e.type==='swarm'?13:22,e.r*1.55);
     ctx.save(); ctx.translate(x,y);
     shadow(0,R,R*(big?1.05:0.9),R*0.34,big?0.34:0.24);
-    if(e.type==='elite'||e.type==='boss'){
+    if(big){
       const gr=ctx.createRadialGradient(0,0,R*0.5,0,0,R*1.7);
       const c=e.color;
       gr.addColorStop(0,e.type==='boss'?hexA(c,0.3):hexA('#ffd97a',0.26));
@@ -392,7 +387,7 @@ function drawEnemies(alpha){
     if(!done){ ctx.scale(R,R); ctx.translate(0,-1); drawChibi(e,pal,flash); }
     ctx.restore();
 
-    if(e.hp<e.maxHp && (e.type==='elite'||e.type==='boss')){
+    if(e.hp<e.maxHp && big){
       const w=R*2.1, hpw=w*clamp(e.hp/e.maxHp,0,1), by=y-R*1.85;
       ctx.fillStyle='rgba(74,61,99,.55)'; ctx.fillRect(x-w/2,by,w,6);
       ctx.fillStyle=e.color; ctx.fillRect(x-w/2,by,hpw,6);
@@ -410,6 +405,15 @@ function drawHazards(){
   const T=game.time;
   for(const h of game.hazards){
     const a=clamp(h.life/(h.max||CFG.SPORE.hazardLife),0,1);
+    if(h.kind){
+      const pending=game.time<h.activeAt;
+      const frame=pending?Math.floor(clamp(1-(h.activeAt-game.time)/.3,0,.99)*6):7+Math.floor(T*8)%4;
+      drawMotionFrame(h.kind,frame,h.x,h.y,h.r*2.6);
+      ctx.strokeStyle=pending?'#ae6f3e':hexA(h.color,.92); ctx.lineWidth=2;
+      if(pending) ctx.setLineDash([6,5]);
+      ctx.beginPath(); ctx.arc(h.x,h.y,h.r,0,TAU); ctx.stroke(); ctx.setLineDash([]);
+      continue;
+    }
     const g=ctx.createRadialGradient(h.x,h.y,h.r*0.2,h.x,h.y,h.r);
     g.addColorStop(0,hexA(h.color||'#ffc7e0',.42*a));
     g.addColorStop(.7,hexA(h.color||'#f0a0c8',.24*a));
@@ -430,6 +434,7 @@ function drawLaserFx(){
     if(f.type==='bossCircle' || f.type==='bossBurst'){
       const progress=1-f.life/f.max;
       const warning=f.type==='bossCircle';
+      if(warning && f.key) drawMotionFrame(f.key,Math.min(5,Math.floor(progress*6)),f.x,f.y,f.r*2.7);
       ctx.save();
       ctx.fillStyle=hexA(f.color,warning?.15+progress*.22:.35*(1-progress));
       ctx.strokeStyle=warning?'#82395d':hexA(f.color,1-progress);
@@ -466,22 +471,15 @@ function drawLaserFx(){
 function drawBullets(alpha){
   for(const b of game.bullets){
     const x=b.ox+(b.x-b.ox)*alpha, y=b.oy+(b.y-b.oy)*alpha, a=Math.atan2(b.vy,b.vx);
-    ctx.save(); ctx.translate(x,y); ctx.rotate(a);
-    const tg=ctx.createLinearGradient(-b.r*5,0,b.r,0);
-    tg.addColorStop(0,'#88dffd00'); tg.addColorStop(1,'#7ce7ff');
-    ctx.fillStyle=tg; ctx.beginPath(); ctx.moveTo(-b.r*5,0); ctx.lineTo(b.r,-b.r*0.6);
-    ctx.lineTo(b.r,b.r*0.6); ctx.closePath(); ctx.fill();
-    ctx.shadowColor='#29aef4'; ctx.shadowBlur=7;
-    starPath(b.r*.4,0,b.r*1.19,.48,5,0);
-    ctx.fillStyle='#e8fbff'; ctx.fill();
-    ctx.strokeStyle='#396be0'; ctx.lineWidth=1.75; ctx.lineJoin='round'; ctx.stroke();
-    ctx.restore();
+    const spirit=b.kind==='sprite';
+    candyComet(x,y,a,skillRank(spirit?'sprite':'bolt'),spirit?CANDY_GLASS.rose:CANDY_GLASS.sky);
   }
 }
 // 敌方糖果弹（按 Boss 主题色）
 function drawEBullets(){
   for(const b of game.ebullets){
     const a=Math.atan2(b.vy,b.vx), c=b.color||'#ff85a8';
+    if(b.kind==='bubble-shot' && drawMotionFrame(b.kind,9,b.x,b.y,54,54,a)) continue;
     ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(a);
     const tg=ctx.createLinearGradient(-b.r*4,0,b.r,0);
     tg.addColorStop(0,hexA(c,0)); tg.addColorStop(1,c);
@@ -496,23 +494,8 @@ function drawEBullets(){
 function drawNova(){
   for(const f of game.fx){
     if(f.type!=='nova')continue;
-    const k=f.life/f.max, prog=1-k;
-    ctx.save(); ctx.translate(f.x,f.y);
-    const cols=['#ffd166','#ffa9cf','#8fd8ff'];
-    for(let layer=0;layer<3;layer++){
-      ctx.globalAlpha=k*(0.9-layer*0.2); ctx.lineWidth=5*k+1-layer;
-      ctx.strokeStyle=cols[layer];
-      ctx.beginPath(); ctx.arc(0,0,f.r*(1-layer*0.09),0,TAU); ctx.stroke();
-    }
-    ctx.globalAlpha=k*0.8; ctx.lineWidth=2.4;
-    for(let i=0;i<16;i++){
-      const a=i/16*TAU+prog*0.3, r0=f.r*0.88, r1=f.r*(1.08+0.12*Math.sin(i*3));
-      ctx.strokeStyle=cols[i%3];
-      ctx.beginPath(); ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);
-      ctx.lineTo(Math.cos(a)*r1,Math.sin(a)*r1); ctx.stroke();
-      star(Math.cos(a)*r1,Math.sin(a)*r1,4+3*k,cols[(i+1)%3],4,0.4,a);
-    }
-    ctx.globalAlpha=1; ctx.restore();
+    const rank=skillRank('nova');
+    crystalBloom(f.x,f.y,f.R,1-f.life/f.max,rank,CANDY_GLASS.rose,6+2*rank);
   }
 }
 // 流星（原紫电 → 金色流星拖尾 + 星芒落点）
@@ -520,20 +503,19 @@ function drawLightning(){
   for(const f of game.fx){
     if(f.type!=='lightning' && f.type!=='meteorImpact')continue;
     const k=f.life/f.max;
-    ctx.save();
     const flight=f.type==='lightning';
-    const headX=f.x2+(f.x1-f.x2)*k, headY=f.y2+(f.y1-f.y2)*k;
-    ctx.globalAlpha=flight?1:k;
-    if(flight){
-      const trail=ctx.createLinearGradient(f.x1,f.y1,headX,headY);
-      trail.addColorStop(0,'#ffd18c00'); trail.addColorStop(1,'#f8a54d');
-      ctx.strokeStyle=trail; ctx.lineWidth=13; ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(f.x1,f.y1); ctx.lineTo(headX,headY); ctx.stroke();
-      star(headX,headY,13,'#fff1ad',4,.43,game.time*9,true);
+    const radius=f.r||34;
+    const rank=skillRank('lightning');
+    if(!flight){
+      crystalBloom(f.x2,f.y2,radius,1-k,rank,CANDY_GLASS.honey,5+rank);
+      continue;
     }
-    ctx.strokeStyle=flight?'#ac663a':'#fae3a3'; ctx.lineWidth=flight?2:4*k;
-    if(flight) ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.arc(f.x2,f.y2,flight?34:22+27*(1-k),0,TAU); ctx.stroke();
+    ctx.save();
+    const headX=f.x2+(f.x1-f.x2)*k, headY=f.y2+(f.y1-f.y2)*k;
+    ctx.strokeStyle='#ac663a'; ctx.lineWidth=1.5; ctx.setLineDash([4,6]);
+    ctx.beginPath(); ctx.arc(f.x2,f.y2,radius,0,TAU); ctx.stroke();
+    ctx.setLineDash([]);
+    candyComet(headX,headY,Math.atan2(f.y2-f.y1,f.x2-f.x1),rank,CANDY_GLASS.honey);
     ctx.restore();
   }
 }
@@ -553,22 +535,77 @@ function drawBossEntrance(){
   }
   ctx.restore();
 }
+function drawExpansionGround(){
+  const time=game.time;
+  for(const field of game.timeFields){
+    const age=field.max-field.life, rank=skillRank('chrono'), pal=CANDY_GLASS.iris;
+    ctx.save(); ctx.translate(field.x,field.y);
+    for(let i=0;i<12;i++){
+      const a=i*TAU/12-Math.PI/2;
+      const active=i===Math.floor(age*4)%12;
+      ctx.beginPath(); ctx.arc(0,0,field.r,a+.05,a+(active?.48:.21));
+      ctx.lineWidth=active?3:1.4; ctx.strokeStyle=pal[0]; ctx.stroke();
+      if(i%3===0||active) cutGem(Math.cos(a)*field.r,Math.sin(a)*field.r,a,active?7:4,2.5,pal);
+    }
+    const hand=Math.floor(age*4)*TAU/12-Math.PI/2;
+    cutGem(Math.cos(hand)*(field.r-14),Math.sin(hand)*(field.r-14),hand,8,3,pal);
+    if(rank>1) cutGem(Math.cos(-hand)*24,Math.sin(-hand)*24,-hand,12,2,pal);
+    if(rank===3) cutGem(0,0,age,6,4,pal);
+    ctx.restore();
+  }
+  for(const mine of game.mines){
+    const armed=time>=mine.armAt, rank=skillRank('mine');
+    for(let i=0;i<3+rank;i++){
+      const a=TAU*i/(3+rank), r=armed?7:3;
+      cutGem(mine.x+Math.cos(a)*r,mine.y+Math.sin(a)*r,a,4,2,CANDY_GLASS.honey);
+    }
+    cutGem(mine.x,mine.y,-Math.PI/2,6,4,armed?CANDY_GLASS.rose:CANDY_GLASS.iris);
+  }
+  for(const blade of game.blades){
+    const rank=skillRank('boomer');
+    ctx.save(); ctx.translate(blade.x,blade.y); ctx.rotate(time*13+blade.angle);
+    for(let i=0;i<rank+1;i++){
+      ctx.rotate(TAU/(rank+1));
+      ctx.beginPath(); ctx.moveTo(-3,2); ctx.quadraticCurveTo(7,-14,16,-10);
+      ctx.quadraticCurveTo(8,-5,6,2); ctx.closePath();
+      ctx.fillStyle=CANDY_GLASS.iris[1]; ctx.fill(); ctx.strokeStyle=CANDY_GLASS.iris[0]; ctx.lineWidth=1.5; ctx.stroke();
+    }
+    cutGem(0,0,0,5,3,CANDY_GLASS.honey); ctx.restore();
+  }
+  const weapon=player.weapons.sprite;
+  if(weapon){
+    const count=starlingCount(weapon.level);
+    for(let i=0;i<count;i++){
+      const {x,y}=starlingPosition(i,count);
+      const rank=skillRank('sprite');
+      if(rank>=2){
+        const wing=Math.sin(time*9+i)*.36;
+        cutGem(x-9,y-5,-.7-wing,5,2,CANDY_GLASS.rose);
+        cutGem(x+9,y-5,.7+wing,5,2,CANDY_GLASS.rose);
+      }
+      if(rank===3) cutGem(x,y-16,Math.PI/2,4,2,CANDY_GLASS.honey);
+      if(!drawMotionFrame('sprite',8+Math.floor(time*8+i)%4,x,y-3,49)){
+        star(x,y,10,'#ffaae2',5,.42,0,true);
+      }
+    }
+  }
+}
+
 function drawPlayer(alpha){
   const P=CFG.ART.friend, T=game.time;
   const wp=player.weapons.orbit;
   if(wp){
-    const n=2+wp.level,R=54+wp.level*3;
+    const n=2+wp.level,R=(54+wp.level*3)*areaScale();
+    const rank=skillRank('orbit'), pal=CANDY_GLASS.honey;
     for(let k=0;k<n;k++){
       const a=(player.orbAngle||0)+k/n*TAU;
       const bx=player.x+Math.cos(a)*R, by=player.y+Math.sin(a)*R;
-      ctx.save(); ctx.translate(bx,by);
-      const cols=['#ffd166','#ffa9cf','#8fd8ff'];
-      const gl=ctx.createRadialGradient(0,0,1,0,0,16);
-      gl.addColorStop(0,hexA(cols[k%3],0.55)); gl.addColorStop(1,hexA(cols[k%3],0));
-      ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(0,0,16,0,TAU); ctx.fill();
-      ctx.shadowColor=cols[k%3]; ctx.shadowBlur=9;
-      star(0,0,8,cols[k%3],5,0.45,a+T*2,true);
-      ctx.shadowBlur=0; ctx.restore();
+      ctx.beginPath(); ctx.arc(player.x,player.y,R,a-.48,a);
+      ctx.arc(player.x,player.y,R-3,a,a-.36,true);
+      ctx.closePath(); ctx.fillStyle=pal[1]; ctx.fill();
+      cutGem(bx,by,a+Math.PI/2,9,4.5,pal);
+      if(rank>=2) cutGem(bx,by,a,6,2.5,CANDY_GLASS.rose);
+      if(rank===3) cutGem(player.x+R*Math.cos(a-.52),player.y+R*Math.sin(a-.52),a,3,2,pal);
     }
   }
   const x=player.ox+(player.x-player.ox)*alpha, y=player.oy+(player.y-player.oy)*alpha;
@@ -656,7 +693,9 @@ function updateHUD(force){
   set('hKills',game.levelKills);
   set('hpText',Math.ceil(player.hp)+' / '+Math.round(player.maxHp));
   set('hGoal',levelGoalText());
-  const xpPct=clamp(player.xp/player.xpNext,0,1)*100;
+  const maxed=player.level>=CFG.LEVEL.playerMax;
+  const xpPct=maxed?100:clamp(player.xp/player.xpNext,0,1)*100;
+  set('xpStatus',maxed?'满级 · 拾取回血':xpPct>=100?'继续战斗 · 等待强化':'');
   const hpPct=clamp(player.hp/player.maxHp,0,1)*100;
   const hpBarEl=document.getElementById('hpBar');
   if(hpBarEl){ const low=hpPct<30; if(force||hudCache.low!==low){ hpBarEl.classList.toggle('low',low); hudCache.low=low; } }
@@ -675,11 +714,9 @@ function updateHUD(force){
   }
 }
 function levelGoalText(){
-  const max=CFG.LEVEL.playerMax;
   if(game.bossSpawned) return '关底决战';
   if(game.bossIntro) return '关底正在降临…';
-  if(player.level>=max) return '即将迎战关底';
-  return `升至 Lv${max} 迎战关底`;
+  return `距关底降临 ${fmtTime(Math.max(0,Math.ceil(CFG.LEVEL.bossAt-game.levelTime)))}`;
 }
 function showBossBar(on){
   document.getElementById('bossbar').style.display=on?'block':'none';
@@ -687,7 +724,7 @@ function showBossBar(on){
 }
 function showBossPhase(st){
   const n=document.getElementById('bossName');
-  const tail=['','','· 第二形态','· 最终形态'][st]||'';
+  const tail=['','','· 第二形态','· 第三形态','· 狂暴形态'][st]||'';
   n.textContent=`🌟 ${game.bossKind?game.bossKind.name:''} ${tail}`;
 }
 function toast(msg){
@@ -724,4 +761,114 @@ function dismissOverlay(id){
     {duration:115,easing:'ease-out',fill:'forwards'});
   overlayExits.set(layer,exit);
   exit.onfinish=()=>{ if(overlayExits.get(layer)===exit) hide(id); };
+}
+
+// 选卡面板只改变战场的展示。暂停由 levelup 状态保持到离场完成。
+let rewardBusy=false, rewardPeeking=false;
+function updateRewardPeek(peeking){
+  rewardPeeking=peeking;
+  document.getElementById('levelup').classList.toggle('is-peeking',peeking);
+  document.getElementById('rewardContent').inert=peeking||rewardBusy;
+  document.getElementById('rewardPeekBtn').setAttribute('aria-expanded',String(!peeking));
+  document.getElementById('rewardPeekLabel').textContent=peeking?'返回选牌':'查看战场';
+  document.getElementById('rewardPeekStatus').textContent=peeking?'战斗已暂停':'';
+}
+function toggleRewardPeek(){
+  if(game.state!=='levelup' || rewardBusy) return;
+  updateRewardPeek(!rewardPeeking);
+  const target=rewardPeeking?document.getElementById('rewardPeekBtn'):document.getElementById('cards').firstElementChild;
+  target?.focus({preventScroll:true});
+}
+function setRewardBusy(busy){
+  rewardBusy=busy;
+  document.getElementById('rewardContent').inert=busy||rewardPeeking;
+  document.getElementById('rewardPeekBtn').disabled=busy;
+}
+function rewardMotion(){
+  return document.getElementById('rewardContent').animate && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+function rewardAnimationsDone(animations,done){
+  Promise.all(animations.map(animation=>animation.finished.catch(()=>{}))).then(done);
+}
+function presentReward(){
+  const wasOpen=VIS.levelup, cards=document.getElementById('cards');
+  updateRewardPeek(false);
+  show('levelup');
+  if(!rewardMotion()){
+    setRewardBusy(false);
+    cards.firstElementChild?.focus({preventScroll:true});
+    return;
+  }
+  setRewardBusy(true);
+  document.getElementById('rewardDialog').focus({preventScroll:true});
+  const draft=game.cards, animations=[];
+  const veil=document.getElementById('rewardVeil');
+  if(!wasOpen) animations.push(veil.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out',fill:'backwards'}));
+  animations.push(document.querySelector('.reward-head').animate(
+    [{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:215,easing:'ease-out',fill:'backwards'}));
+  for(const id of ['skipCardBtn','rewardPeekBtn']){
+    animations.push(document.getElementById(id).animate([{opacity:0},{opacity:1}],
+      {delay:235,duration:150,easing:'ease-out',fill:'backwards'}));
+  }
+  for(const [i,card] of Array.from(cards.children).entries()){
+    const delay=(wasOpen?24:84)+i*46;
+    animations.push(card.animate([{opacity:0,transform:'translateY(28px) scale(.92)'},
+      {opacity:1,transform:'none'}],{delay,duration:238,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'}));
+    animations.push(card.firstElementChild.animate([
+      {opacity:1,transform:'rotateY(0deg)',offset:0},
+      {opacity:1,transform:'rotateY(0deg)',offset:.38},
+      {opacity:1,transform:'rotateY(90deg)',offset:.54},
+      {opacity:0,transform:'rotateY(90deg)',offset:1},
+    ],{delay,duration:350,fill:'backwards'}));
+    animations.push(card.lastElementChild.animate([
+      {opacity:0,transform:'rotateY(-90deg)',offset:0},
+      {opacity:0,transform:'rotateY(-90deg)',offset:.54},
+      {opacity:1,transform:'rotateY(0deg)',offset:1},
+    ],{delay,duration:350,fill:'backwards'}));
+  }
+  rewardAnimationsDone(animations,()=>{
+    if(game.state!=='levelup' || game.cards!==draft) return;
+    setRewardBusy(false);
+    cards.firstElementChild?.focus({preventScroll:true});
+  });
+}
+function playRewardSelection(index,done){
+  if(rewardBusy || rewardPeeking) return;
+  if(!rewardMotion()){ done(); return; }
+  setRewardBusy(true);
+  document.getElementById('rewardDialog').focus({preventScroll:true});
+  const draft=game.cards, cards=document.getElementById('cards');
+  const animations=Array.from(cards.children,(card,i)=>{
+    const selected=i===index;
+    card.classList.toggle('is-selected',selected);
+    return card.animate([
+      {opacity:1,transform:'none'},
+      {opacity:selected?1:.38,transform:selected?'translateY(-12px) scale(1.045)':'translateY(8px) scale(.97)',offset:.42},
+      {opacity:0,transform:selected?'translateY(-26px) scale(.98)':'translateY(16px) scale(.96)'},
+    ],{duration:selected?230:175,fill:'forwards',easing:'ease-out'});
+  });
+  rewardAnimationsDone(animations,()=>{
+    if(game.state==='levelup' && game.cards===draft) done();
+  });
+}
+function closeReward(){
+  const draft=game.cards, veil=document.getElementById('rewardVeil'), content=document.getElementById('rewardContent');
+  const resume=()=>{
+    if(game.state!=='levelup' || game.cards!==draft) return;
+    hide('levelup');
+    for(const actor of [player,...game.enemies,...game.bullets]){
+      actor.ox=actor.x; actor.oy=actor.y;
+    }
+    setRewardBusy(false);
+    game.state='playing';
+    document.getElementById('pauseBtn').focus?.({preventScroll:true});
+  };
+  if(!rewardMotion()){ resume(); return; }
+  setRewardBusy(true);
+  const animations=[veil,content].map(el=>el.animate([{opacity:1},{opacity:0}],
+    {duration:165,easing:'ease-out',fill:'forwards'}));
+  rewardAnimationsDone(animations,()=>{
+    resume();
+    animations.forEach(animation=>animation.cancel());
+  });
 }

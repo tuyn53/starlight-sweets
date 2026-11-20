@@ -14,7 +14,7 @@ function frame(now){
     }
   } else if(Juice.stop>0){ /* hit-stop：冻结世界推进，仍渲染打击帧 */ }
   else acc=0;
-  render(game.state==='playing'?clamp(acc/CFG.STEP,0,1):0);
+  render(game.state==='levelup'?1:game.state==='playing'?clamp(acc/CFG.STEP,0,1):0);
   // 首页骨骼动画并入同一 rAF：仅在菜单可见且加载层已收场时绘制，
   // 加载阶段不白画（被加载层遮住），也不读 DOM 布局属性（避免强制重排）。
   if(homeRigs.length && VIS.menu && loadLayer.classList.contains('done')) drawHome(now);
@@ -157,7 +157,8 @@ function closeSettings(immediate=false){
   if(lastFocused && lastFocused.focus) lastFocused.focus();
 }
 settingsBtn.addEventListener('click', openSettings);
-const rewardDialog=document.querySelector('.reward-drawer');
+const rewardDialog=document.getElementById('rewardDialog');
+document.getElementById('rewardPeekBtn').addEventListener('click',toggleRewardPeek);
 document.getElementById('skipCardBtn').addEventListener('click',skipCard);
 document.getElementById('pauseSettings').addEventListener('click', openSettings);
 document.getElementById('settingsClose').addEventListener('click', closeSettings);
@@ -168,7 +169,8 @@ document.addEventListener('keydown', e => {
   if(sceneBusy && (e.key==='Tab'||e.key==='Escape'||e.key==='Esc')){ e.preventDefault(); return; }
   const panel=settingsOpen?settingsPanel:pauseOpen?pausePanel:game.state==='levelup'?rewardDialog:null;
   if(panel && e.key==='Tab'){
-    const buttons=panel.querySelectorAll('button:not(:disabled)');
+    const buttons=panel.querySelectorAll('button:not(:disabled):not([inert] button)');
+    if(!buttons.length){ e.preventDefault(); panel.focus(); return; }
     const first=buttons[0], last=buttons[buttons.length-1];
     if(!panel.contains(document.activeElement) || document.activeElement===(e.shiftKey?first:last)){
       e.preventDefault();
@@ -179,6 +181,7 @@ document.addEventListener('keydown', e => {
   if(e.key !== 'Escape' && e.key !== 'Esc') return;
   if(settingsOpen){ e.preventDefault(); closeSettings(); }
   else if(pauseOpen){ e.preventDefault(); closePause(); }
+  else if(game.state==='levelup'){ e.preventDefault(); toggleRewardPeek(); }
   else if(game.state==='playing'){ e.preventDefault(); openPause(); }
 });
 // 音效：点击切换，在用户手势中解锁音频
@@ -296,15 +299,18 @@ function enterGame(){
 // 入口保留原生按钮语义，可用键盘和触屏操作。
 loadStart.addEventListener('click', enterGame);
 
-loadSprites(
-  finishLoading,
-  (done, total, ok, key)=>{
-    const pct=Math.round(done/total*100);
-    if(loadFill) loadFill.style.setProperty('--progress',pct/100);
-    if(loadPct) loadPct.textContent=pct+'%';
-    tipFor(pct);
-  }
-);
+const bootTotal=Object.keys(SPRITE_SRC).length+Object.keys(VFX_CLIPS).length;
+let bootLoaded=0;
+function updateBootProgress(){
+  const pct=Math.round(++bootLoaded/bootTotal*100);
+  if(loadFill) loadFill.style.setProperty('--progress',pct/100);
+  if(loadPct) loadPct.textContent=pct+'%';
+  tipFor(pct);
+}
+Promise.all([
+  loadBattleEffects(updateBootProgress),
+  new Promise(resolve=>loadSprites(resolve,updateBootProgress)),
+]).then(finishLoading);
 requestAnimationFrame(frame);
 
 // === 大厅角色待机 ===

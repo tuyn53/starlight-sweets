@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="-64 -64 128 128" role="img" aria-label="星辉结界">
+  <defs>
+    <linearGradient id="energy" x2=".85" y2="1"><stop stop-color="#fff8da"/><stop offset=".52" stop-color="#91f2b2"/><stop offset="1" stop-color="#91f2b2" stop-opacity=".30"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#91f2b2" stop-opacity=".75"/><stop offset="1" stop-color="#91f2b2" stop-opacity="0"/></radialGradient>
+  </defs>
+  <g opacity="0">
+    <circle cx="0" cy="0" r="26" fill="none" stroke="#91f2b2" stroke-width="2.5" opacity="0.85" stroke-dasharray="8 7"/><polygon points="0.0,-12.0 3.0,-3.0 12.0,0.0 3.0,3.0 0.0,12.0 -3.0,3.0 -12.0,0.0 -3.0,-3.0" fill="#fff6cd"/>
+    <animate attributeName="opacity" values="0;1;0" dur="0.1s" fill="freeze"/>
+    <animateTransform attributeName="transform" type="scale" values=".65;1.12" dur="0.1s" fill="freeze"/>
+  </g>
+  <g opacity="0">
+    <path d="M0-45C-13-35-22-32-37-31v27c0 23 18 37 37 48C19 33 37 19 37-4v-27C22-32 13-35 0-45Z" fill="url(#glow)"/><path d="M0-45C-13-35-22-32-37-31v27c0 23 18 37 37 48C19 33 37 19 37-4v-27C22-32 13-35 0-45Z" fill="none" stroke="url(#energy)" stroke-width="3.7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="none"/><circle cx="0" cy="0" r="35" fill="none" stroke="url(#energy)" stroke-width="2" opacity="0.55" stroke-dasharray="16 7"/><polygon points="40.0,-5.0 41.2,-1.2 45.0,0.0 41.2,1.2 40.0,5.0 38.8,1.2 35.0,0.0 38.8,-1.2" fill="#fff6cd"/><polygon points="12.4,34.6 13.2,37.2 15.8,38.0 13.2,38.8 12.4,41.4 11.6,38.8 9.1,38.0 11.6,37.2" fill="#fff6cd"/><polygon points="-32.4,18.5 -31.2,22.3 -27.4,23.5 -31.2,24.7 -32.4,28.5 -33.6,24.7 -37.4,23.5 -33.6,22.3" fill="#fff6cd"/><polygon points="-32.4,-26.9 -31.6,-24.3 -29.0,-23.5 -31.6,-22.7 -32.4,-20.1 -33.2,-22.7 -35.8,-23.5 -33.2,-24.3" fill="#fff6cd"/><polygon points="12.4,-43.0 13.6,-39.2 17.4,-38.0 13.6,-36.8 12.4,-33.0 11.2,-36.8 7.4,-38.0 11.2,-39.2" fill="#fff6cd"/>
+    <animate attributeName="opacity" values="0;1;1;.8" keyTimes="0;.12;.85;1" begin="0.1s" dur="0.34s" fill="freeze"/>
+    <animate attributeName="opacity" values=".8;0" begin="0.440s" dur="0.2s" fill="freeze"/>
+    <animateTransform attributeName="transform" type="scale" from=".65" to="1.15" begin="0.1s" dur="0.540s" fill="freeze"/>
+  </g>
+  <g opacity="0"><polygon points="35.0,-4.0 36.0,-1.0 39.0,0.0 36.0,1.0 35.0,4.0 34.0,1.0 31.0,0.0 34.0,-1.0" fill="#fff6cd"/><polygon points="17.5,27.6 18.2,29.6 20.2,30.3 18.2,31.0 17.5,33.0 16.8,31.0 14.8,30.3 16.8,29.6" fill="#fff6cd"/><polygon points="-17.5,26.3 -16.5,29.3 -13.5,30.3 -16.5,31.3 -17.5,34.3 -18.5,31.3 -21.5,30.3 -18.5,29.3" fill="#fff6cd"/><polygon points="-35.0,-2.7 -34.3,-0.7 -32.3,0.0 -34.3,0.7 -35.0,2.7 -35.7,0.7 -37.7,0.0 -35.7,-0.7" fill="#fff6cd"/><polygon points="-17.5,-34.3 -16.5,-31.3 -13.5,-30.3 -16.5,-29.3 -17.5,-26.3 -18.5,-29.3 -21.5,-30.3 -18.5,-31.3" fill="#fff6cd"/><polygon points="17.5,-33.0 18.2,-31.0 20.2,-30.3 18.2,-29.6 17.5,-27.6 16.8,-29.6 14.8,-30.3 16.8,-31.0" fill="#fff6cd"/>
+    <animate attributeName="opacity" values="0;.9;0" begin="0.440s" dur="0.2s" fill="freeze"/>
+    <animateTransform attributeName="transform" type="scale" values=".72;1.42" begin="0.440s" dur="0.2s" fill="freeze"/>
+  </g>
+</svg>

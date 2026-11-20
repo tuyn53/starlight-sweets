@@ -597,6 +597,1530 @@
         "created_at": "2026-11-19",
         "license": "AI-generated, project use"
       }
-    }
+    },
+  {
+    "id": "expansion-enemy-swarm",
+    "role": "糖粒 · 粉色无四肢糖豆、糖霜尖与大眼",
+    "path": "assets/characters/swarm-star.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "512x512",
+      "alpha": true,
+      "anchor": "bottom-center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "generated",
+      "url_or_tool": "ImageGen (built-in)",
+      "created_at": "2026-11-20",
+      "license": "AI-generated, project use",
+      "style_reference": "assets/characters/split-star.webp",
+      "prompt": "Create a NEW original production 2D sprite for the same Sweet Star Blitz game as reference. Reference supplies line, proportions and shading only. Draw: tiny pink sugar-drop creature, limbless, rosy jelly body with a pointed sugar frosting crest, big warm eyes, a few large sugar facets; emphasize the teardrop silhouette. One character, neutral idle front facing, slight top-down angle 5 degrees, full body, center anchored, roomy framing; use canvas well, all edges visible. Q-version chibi dessert fantasy, big expressive eyes, very dark purple clean closed outline, 3 matte value bands lit from upper left, distinctive bold readable shape as small as 44 px, no tiny ornamental detail. True transparent background, no cast ground shadow, no halo, no stand, no text, no frame, no action marks. 1:1. Do not reproduce the reference character; use only its art direction. Asset key swarm.",
+      "processing": "Alpha-bounds crop; bottom-center on 512×512; WebP quality 92"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 44
+  },
+  {
+    "id": "expansion-enemy-goo",
+    "role": "麦芽 · 焦糖软泥、右侧拖尾与两颗糖浆滴",
+    "path": "assets/characters/goo-star.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "512x512",
+      "alpha": true,
+      "anchor": "bottom-center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "generated",
+      "url_or_tool": "ImageGen (built-in)",
+      "created_at": "2026-11-20",
+      "license": "AI-generated, project use",
+      "style_reference": "assets/characters/thief-star.webp",
+      "prompt": "Create a NEW original production 2D sprite for the same Sweet Star Blitz game as reference. Reference supplies line, proportions and shading only. Draw: caramel malt slime creature, amber caramel body, pooled teardrop tail extends to viewer right, two large dangling syrup drops, kindly mischievous face, caramel and gold. One character, neutral idle front facing, slight top-down angle 5 degrees, full body, center anchored, roomy framing; use canvas well, all edges visible. Q-version chibi dessert fantasy, big expressive eyes, very dark purple clean closed outline, 3 matte value bands lit from upper left, distinctive bold readable shape as small as 44 px, no tiny ornamental detail. True transparent background, no cast ground shadow, no halo, no stand, no text, no frame, no action marks. 1:1. Do not reproduce the reference character; use only its art direction. Asset key goo.",
+      "processing": "Alpha-bounds crop; bottom-center on 512×512; WebP quality 92"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 44
+  },
+  {
+    "id": "expansion-enemy-bubble",
+    "role": "泡泡 · 青色泡泡糖精灵、鼓腮与嘴旁大泡",
+    "path": "assets/characters/bubble-star.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "512x512",
+      "alpha": true,
+      "anchor": "bottom-center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "generated",
+      "url_or_tool": "ImageGen (built-in)",
+      "created_at": "2026-11-20",
+      "license": "AI-generated, project use",
+      "style_reference": "assets/characters/mimic-star.webp",
+      "prompt": "Create a NEW original production 2D sprite for the same Sweet Star Blitz game as reference. Reference supplies line, proportions and shading only. Draw: pale cyan bubblegum spirit with a compact round translucent gum body, puffed cheeks, blowing one big cyan bubble immediately beside the mouth, body remains clearly outlined and not invisible. One character, neutral idle front facing, slight top-down angle 5 degrees, full body, center anchored, roomy framing; use canvas well, all edges visible. Q-version chibi dessert fantasy, big expressive eyes, very dark purple clean closed outline, 3 matte value bands lit from upper left, distinctive bold readable shape as small as 44 px, no tiny ornamental detail. True transparent background, no cast ground shadow, no halo, no stand, no text, no frame, no action marks. 1:1. Do not reproduce the reference character; use only its art direction. Asset key bubble.",
+      "processing": "Alpha-bounds crop; bottom-center on 512×512; WebP quality 92"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 44
+  },
+  {
+    "id": "expansion-enemy-cloud",
+    "role": "云绵 · 粉白云朵、奶油卷、手抱粉红心",
+    "path": "assets/characters/cloud-star.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "512x512",
+      "alpha": true,
+      "anchor": "bottom-center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "generated",
+      "url_or_tool": "ImageGen (built-in)",
+      "created_at": "2026-11-20",
+      "license": "AI-generated, project use",
+      "style_reference": "assets/characters/souffle-star.webp",
+      "prompt": "Create a NEW original production 2D sprite for the same Sweet Star Blitz game as reference. Reference supplies line, proportions and shading only. Draw: white-pink whipped cream chibi cloud, flat base and billowing rounded top; signature piped cream curl atop head, sleepy gentle eyes, holding a SATURATED pink heart near chest, tiny tucked arms. One character, neutral idle front facing, slight top-down angle 5 degrees, full body, center anchored, roomy framing; use canvas well, all edges visible. Q-version chibi dessert fantasy, big expressive eyes, very dark purple clean closed outline, 3 matte value bands lit from upper left, distinctive bold readable shape as small as 44 px, no tiny ornamental detail. True transparent background, no cast ground shadow, no halo, no stand, no text, no frame, no action marks. 1:1. Do not reproduce the reference character; use only its art direction. Asset key cloud.",
+      "processing": "Alpha-bounds crop; bottom-center on 512×512; WebP quality 92"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 44
+  },
+  {
+    "id": "expansion-enemy-mirror",
+    "role": "镜影 · 紫发镜面少女、镜片裙、锯齿肩部",
+    "path": "assets/characters/mirror-star.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "512x512",
+      "alpha": true,
+      "anchor": "bottom-center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "generated",
+      "url_or_tool": "ImageGen (built-in)",
+      "created_at": "2026-11-20",
+      "license": "AI-generated, project use",
+      "style_reference": "assets/characters/swift-star.webp",
+      "prompt": "Create a NEW original production 2D sprite for the same Sweet Star Blitz game as reference. Reference supplies line, proportions and shading only. Draw: violet chibi mirror-girl with blunt lavender bob, plum cape / asymmetrical dress made from three large faceted mirror plates, strictly one face, silver highlights and jagged mirrored shoulder edge. One character, neutral idle front facing, slight top-down angle 5 degrees, full body, center anchored, roomy framing; use canvas well, all edges visible. Q-version chibi dessert fantasy, big expressive eyes, very dark purple clean closed outline, 3 matte value bands lit from upper left, distinctive bold readable shape as small as 44 px, no tiny ornamental detail. True transparent background, no cast ground shadow, no halo, no stand, no text, no frame, no action marks. 1:1. Do not reproduce the reference character; use only its art direction. Asset key mirror.",
+      "processing": "Alpha-bounds crop; bottom-center on 512×512; WebP quality 92"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 44
+  },
+  {
+    "id": "expansion-enemy-ice",
+    "role": "雪宝 · 半圆雪球、三处冰裂纹、蓝色冰晶冠",
+    "path": "assets/characters/ice-star.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "512x512",
+      "alpha": true,
+      "anchor": "bottom-center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "generated",
+      "url_or_tool": "ImageGen (built-in)",
+      "created_at": "2026-11-20",
+      "license": "AI-generated, project use",
+      "style_reference": "assets/characters/mimic-star.webp",
+      "prompt": "Create a NEW original production 2D sprite for the same Sweet Star Blitz game as reference. Reference supplies line, proportions and shading only. Draw: short stout snowball creature with pale periwinkle frosted shell with 3 broad cracks, readable blue ice crystal tiara, tiny blue boots, delighted bold navy eyes. One character, neutral idle front facing, slight top-down angle 5 degrees, full body, center anchored, roomy framing; use canvas well, all edges visible. Q-version chibi dessert fantasy, big expressive eyes, very dark purple clean closed outline, 3 matte value bands lit from upper left, distinctive bold readable shape as small as 44 px, no tiny ornamental detail. True transparent background, no cast ground shadow, no halo, no stand, no text, no frame, no action marks. 1:1. Do not reproduce the reference character; use only its art direction. Asset key ice.",
+      "processing": "Alpha-bounds crop; bottom-center on 512×512; WebP quality 92"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 44
+  },
+  {
+    "id": "expansion-enemy-millefeuille",
+    "role": "千层 · 金奶油千层精英、层叠酥皮裙、三角酥冠",
+    "path": "assets/characters/millefeuille-star.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "512x512",
+      "alpha": true,
+      "anchor": "bottom-center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "generated",
+      "url_or_tool": "ImageGen (built-in)",
+      "created_at": "2026-11-20",
+      "license": "AI-generated, project use",
+      "style_reference": "assets/characters/elite-star.webp",
+      "prompt": "Create a NEW original production 2D sprite for the same Sweet Star Blitz game as reference. Reference supplies line, proportions and shading only. Draw: elite layered-pastry chibi girl, gold and custard color, clearly visible tiered puff pastry skirt in stacked alternating cream and golden wafer layers, tall triangular pastry crown, side curls, assertive generous smile. One character, neutral idle front facing, slight top-down angle 5 degrees, full body, center anchored, roomy framing; use canvas well, all edges visible. Q-version chibi dessert fantasy, big expressive eyes, very dark purple clean closed outline, 3 matte value bands lit from upper left, distinctive bold readable shape as small as 44 px, no tiny ornamental detail. True transparent background, no cast ground shadow, no halo, no stand, no text, no frame, no action marks. 1:1. Do not reproduce the reference character; use only its art direction. Asset key millefeuille.",
+      "processing": "Alpha-bounds crop; bottom-center on 512×512; WebP quality 92"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 52
+  },
+  {
+    "id": "expansion-enemy-frost-emperor",
+    "role": "冻皇 · 冰封青色果冻、冰晶冠、胸口大星核",
+    "path": "assets/characters/frost-emperor-star.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "512x512",
+      "alpha": true,
+      "anchor": "bottom-center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "generated",
+      "url_or_tool": "ImageGen (built-in)",
+      "created_at": "2026-11-20",
+      "license": "AI-generated, project use",
+      "style_reference": "assets/characters/matcha-star.webp",
+      "prompt": "Create a NEW original production 2D sprite for the same Sweet Star Blitz game as reference. Reference supplies line, proportions and shading only. Draw: elite regal frozen jelly chibi monarch, strong turquoise broad body with faceted ice mantle, sharp tall ice crown, single large visible blue star core in the chest, sweeping short cape, indigo outline. One character, neutral idle front facing, slight top-down angle 5 degrees, full body, center anchored, roomy framing; use canvas well, all edges visible. Q-version chibi dessert fantasy, big expressive eyes, very dark purple clean closed outline, 3 matte value bands lit from upper left, distinctive bold readable shape as small as 44 px, no tiny ornamental detail. True transparent background, no cast ground shadow, no halo, no stand, no text, no frame, no action marks. 1:1. Do not reproduce the reference character; use only its art direction. Asset key frost-emperor.",
+      "processing": "Alpha-bounds crop; bottom-center on 512×512; WebP quality 92"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 52
+  },
+  {
+    "id": "item-icon-area",
+    "role": "星域 · 卡牌图标",
+    "path": "assets/icons/area.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-armor",
+    "role": "护盾 · 卡牌图标",
+    "path": "assets/icons/armor.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-aura",
+    "role": "星辉结界 · 卡牌图标",
+    "path": "assets/icons/aura.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-beam",
+    "role": "光棱 · 卡牌图标",
+    "path": "assets/icons/beam.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-bolt",
+    "role": "星芒 · 卡牌图标",
+    "path": "assets/icons/bolt.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-boomer",
+    "role": "星刃 · 卡牌图标",
+    "path": "assets/icons/boomer.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-chain",
+    "role": "星链 · 卡牌图标",
+    "path": "assets/icons/chain.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-chrono",
+    "role": "星钟 · 卡牌图标",
+    "path": "assets/icons/chrono.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-cooldown",
+    "role": "专注 · 卡牌图标",
+    "path": "assets/icons/cooldown.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-crit",
+    "role": "幸运 · 卡牌图标",
+    "path": "assets/icons/crit.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-critdmg",
+    "role": "星怒 · 卡牌图标",
+    "path": "assets/icons/critdmg.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-damage",
+    "role": "勇气 · 卡牌图标",
+    "path": "assets/icons/damage.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-duration",
+    "role": "恒辉 · 卡牌图标",
+    "path": "assets/icons/duration.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-firerate",
+    "role": "迅捷 · 卡牌图标",
+    "path": "assets/icons/firerate.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-lightning",
+    "role": "流星 · 卡牌图标",
+    "path": "assets/icons/lightning.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-maxhp",
+    "role": "活力 · 卡牌图标",
+    "path": "assets/icons/maxhp.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-mine",
+    "role": "星尘雷 · 卡牌图标",
+    "path": "assets/icons/mine.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-multishot",
+    "role": "幻影 · 卡牌图标",
+    "path": "assets/icons/multishot.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-nova",
+    "role": "星爆 · 卡牌图标",
+    "path": "assets/icons/nova.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-orbit",
+    "role": "星环 · 卡牌图标",
+    "path": "assets/icons/orbit.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-pickup",
+    "role": "引力 · 卡牌图标",
+    "path": "assets/icons/pickup.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-regen",
+    "role": "治愈 · 卡牌图标",
+    "path": "assets/icons/regen.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-revive",
+    "role": "星愿 · 卡牌图标",
+    "path": "assets/icons/revive.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-speed",
+    "role": "轻快 · 卡牌图标",
+    "path": "assets/icons/speed.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-sprite",
+    "role": "星灵 · 卡牌图标",
+    "path": "assets/icons/sprite.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-wave",
+    "role": "星潮 · 卡牌图标",
+    "path": "assets/icons/wave.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "item-icon-xp",
+    "role": "慧心 · 卡牌图标",
+    "path": "assets/icons/xp.svg",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "64x64",
+      "alpha": true,
+      "anchor": "center",
+      "frames": 1,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector",
+      "url_or_tool": "SVG",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "prompt_or_source_record": "docs/美术设计蓝本.md"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "runtime_height_px": 30
+  },
+  {
+    "id": "combat-vfx-bolt",
+    "role": "星芒 · 动效图集",
+    "path": "assets/vfx/bolt.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "player→target",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/bolt.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-orbit",
+    "role": "星环 · 动效图集",
+    "path": "assets/vfx/orbit.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "player",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/orbit.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-aura",
+    "role": "星辉结界 · 动效图集",
+    "path": "assets/vfx/aura.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "player",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/aura.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-lightning",
+    "role": "流星 · 动效图集",
+    "path": "assets/vfx/lightning.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "target",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/lightning.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-nova",
+    "role": "星爆 · 动效图集",
+    "path": "assets/vfx/nova.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "player",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/nova.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-wave",
+    "role": "星潮 · 动效图集",
+    "path": "assets/vfx/wave.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "player",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/wave.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-boomer",
+    "role": "星刃 · 动效图集",
+    "path": "assets/vfx/boomer.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "player→target→player",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/boomer.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-chain",
+    "role": "星链 · 动效图集",
+    "path": "assets/vfx/chain.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "first target→next target",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/chain.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-beam",
+    "role": "光棱 · 动效图集",
+    "path": "assets/vfx/beam.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "player along aim axis",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/beam.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-mine",
+    "role": "星尘雷 · 动效图集",
+    "path": "assets/vfx/mine.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "mine on trigger",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/mine.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-sprite",
+    "role": "星灵 · 动效图集",
+    "path": "assets/vfx/sprite.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "summon or projectile",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/sprite.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-chrono",
+    "role": "星钟 · 动效图集",
+    "path": "assets/vfx/chrono.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "player",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/chrono.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-berry-frost",
+    "role": "莓莓·糖霜三连 · 动效图集",
+    "path": "assets/vfx/berry-frost.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "telegraph point, repeat ×3",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/berry-frost.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-matcha-pool",
+    "role": "抹茶·糖浆减速池 · 动效图集",
+    "path": "assets/vfx/matcha-pool.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "impact point then lingering pool",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/matcha-pool.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-souffle-gust",
+    "role": "云朵·风推白弧 · 动效图集",
+    "path": "assets/vfx/souffle-gust.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "along outward push axis",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/souffle-gust.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-forest-rage",
+    "role": "黑森林·狂暴双束 · 动效图集",
+    "path": "assets/vfx/forest-rage.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "boss along two aim axes",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/forest-rage.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-swarm-spawn",
+    "role": "糖粒·聚集 · 动效图集",
+    "path": "assets/vfx/swarm-spawn.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "group spawn point",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/swarm-spawn.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-goo-syrup",
+    "role": "麦芽·糖浆区 · 动效图集",
+    "path": "assets/vfx/goo-syrup.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "enemy or death point",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/goo-syrup.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-bubble-shot",
+    "role": "泡泡·减速弹 · 动效图集",
+    "path": "assets/vfx/bubble-shot.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "toward player",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/bubble-shot.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-cloud-heal",
+    "role": "云绵·治疗环 · 动效图集",
+    "path": "assets/vfx/cloud-heal.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "cloud",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/cloud-heal.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-mirror-blink",
+    "role": "镜影·瞬移 · 动效图集",
+    "path": "assets/vfx/mirror-blink.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "departure or destination",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/mirror-blink.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-ice-break",
+    "role": "雪宝／冻皇·冰裂 · 动效图集",
+    "path": "assets/vfx/ice-break.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "enemy death point",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/ice-break.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  },
+  {
+    "id": "combat-vfx-millefeuille-buff",
+    "role": "千层·加速环 · 动效图集",
+    "path": "assets/vfx/millefeuille-buff.webp",
+    "status": "integrated",
+    "technical": {
+      "dimensions": "768x384",
+      "alpha": true,
+      "anchor": "elite",
+      "frames": 18,
+      "filtering": "smooth"
+    },
+    "source": {
+      "kind": "original-vector-atlas",
+      "url_or_tool": "SVG / Chromium",
+      "created_at": "2026-11-20",
+      "license": "MIT (project LICENSE)",
+      "editable_source": "assets/vfx/millefeuille-buff.svg"
+    },
+    "verification": {
+      "native_scale_reviewed": true,
+      "in_engine_reviewed": false,
+      "technical_checks_passed": true
+    },
+    "playback_index": "assets/vfx/motion.json"
+  }
   ]
 }

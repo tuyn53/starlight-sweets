@@ -90,7 +90,7 @@
         <span class="hbar-ico" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M12 2.8l2.6 5.5 6 .8-4.4 4.2 1.1 5.9L12 16.4l-5.3 2.8 1.1-5.9L3.4 9.1l6-.8L12 2.8z"/><ellipse class="shine" cx="9.3" cy="8.2" rx="1.5" ry="0.9" transform="rotate(-30 9.3 8.2)"/></svg>
         </span>
-        <div class="hbar-track"><i id="xpFill"></i><span class="hbar-text dim">经验</span></div>
+        <div class="hbar-track" aria-label="经验"><i id="xpFill"></i><span id="xpStatus" class="hbar-text"></span></div>
       </div>
     </div>
     <button id="pauseBtn" class="hud-pause" type="button" aria-label="暂停游戏" title="暂停 / 退出（Esc）">
@@ -158,13 +158,23 @@
 </div>
 
 <div id="levelup" class="screen hidden">
-  <section class="reward-drawer" role="dialog" aria-modal="true" aria-labelledby="upTitle">
-    <header class="reward-head">
-      <h2 id="upTitle">选择强化</h2>
-      <p id="upHint" aria-live="polite"></p>
-    </header>
-    <div id="cards"></div>
-    <button id="skipCardBtn" type="button">放弃本次强化 <span aria-hidden="true">→</span></button>
+  <div id="rewardVeil" aria-hidden="true"></div>
+  <section id="rewardDialog" class="reward-drawer" role="dialog" aria-modal="true" aria-labelledby="upTitle" tabindex="-1">
+    <div id="rewardContent">
+      <header class="reward-head">
+        <h2 id="upTitle">选择强化</h2>
+        <p id="upHint" aria-live="polite"></p>
+      </header>
+      <div id="cards"></div>
+      <button id="skipCardBtn" type="button">放弃本次强化</button>
+    </div>
+    <p id="rewardPeekStatus" aria-live="polite"></p>
+    <button id="rewardPeekBtn" type="button" aria-controls="rewardContent" aria-expanded="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.5"/>
+      </svg>
+      <span id="rewardPeekLabel">查看战场</span>
+    </button>
   </section>
 </div>
 
@@ -194,7 +204,7 @@
       </span>
       <h2 id="pauseTitle">休息一下</h2>
     </div>
-    <p class="pause-sub" id="hGoal">升至 Lv20 迎战关底</p>
+    <p class="pause-sub" id="hGoal">关底倒计时</p>
     <div class="pause-actions">
       <button class="btn pause-continue" id="pauseContinue" type="button">▶ 继续游戏</button>
       <button class="btn ghost" id="pauseSettings" type="button" aria-haspopup="dialog" aria-controls="settingsPanel" aria-expanded="false">游戏设置</button>
@@ -210,6 +220,8 @@
 <script src="js/rig.js"></script>
 <script src="js/sprites.js"></script>
 <script src="js/slicerig.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/expansion.js"></script>
 <script src="js/logic.js"></script>
 <script src="js/tilemap.js"></script>
 <script src="js/render.js"></script>

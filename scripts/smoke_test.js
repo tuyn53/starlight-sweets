@@ -1,7 +1,7 @@
 const fs=require('fs'),vm=require('vm');
 // 用法：在项目根目录执行  node scripts/smoke_test.js
 // 说明：拼接 js/ 核心脚本到 vm 沙箱，用最小 DOM 桩跑关卡/机制/选敌/渲染回归。
-const files=['js/config.js','js/core.js','js/rig.js','js/sprites.js','js/slicerig.js','js/logic.js','js/tilemap.js','js/render.js'];
+const files=['js/config.js','js/core.js','js/rig.js','js/sprites.js','js/slicerig.js','js/effects.js','js/expansion.js','js/logic.js','js/tilemap.js','js/render.js'];
 let code=files.map(f=>fs.readFileSync(f,'utf8')).join('\n');
 
 // --- DOM / browser stubs ---
@@ -9,7 +9,7 @@ const store={};
 function mkEl(){return {
   style:{}, _cls:'', classList:{add(){},remove(){},contains(){return false},toggle(){return true}},
   textContent:'', innerHTML:'',
-  appendChild(){}, addEventListener(){},
+  appendChild(){}, addEventListener(){}, focus(){},
   setAttribute(){}, getContext(){return ctx2d},
   get style(){return this._style||(this._style={setProperty(name,value){this[name]=value;}})},
 };}
@@ -52,7 +52,11 @@ function ok(name,cond){ if(cond){pass++;console.log('  ✓',name);}else{fail++;c
 console.log('\n[1] 初始状态与配置');
 ok('总关卡=20', run('CFG.LEVEL.total')===20);
 ok('满级=20', run('CFG.LEVEL.playerMax')===20);
-ok('经验曲线=1.18', run('CFG.XP_GROW')===1.18);
+ok('经验表覆盖 Lv1→20，首抽 5 点且后续门槛递增', run(`(()=>{
+  const costs=CFG.PROGRESSION.xpCosts;
+  return costs.length===CFG.LEVEL.playerMax-1 && costs[0]===5 &&
+    costs.slice(1).every((cost,i)=>cost>costs[i]);
+})()`));
 ok('初始已解锁=1', run('game.unlocked')===1);
 ok('第5关是主题Boss关', run('isBossLevel(5)')===true);
 ok('第6关不是主题Boss关', run('isBossLevel(6)')===false);
@@ -84,33 +88,32 @@ run('startLevel(6)');
 ok('第6关关底=关底守卫', run('game.bossGuard')===true);
 ok('普通关也有bossKind(守卫)', run('game.bossKind!==null')===true);
 
-console.log('\n[3] 满级触发关底（普通关不再按存活/击杀过关）');
+console.log('\n[3] 定时触发关底，击杀才过关');
 run('startLevel(2)');
-// 把经验喂到足够升满级，gainXp 的循环会逐级升到 Lv20 封顶
-run('player.xp=1e9; gainXp(0);');
-ok('升到满级Lv20', run('player.level')===20);
-// 模拟玩家选完最后一张升级卡（state 回到 playing、pendingLevels 清零）
-run('game.pendingLevels=0; game.state="playing"; update(CFG.STEP)');
-ok('满级触发关底演出', run('game.bossIntro')===true);
+run('player.level=CFG.LEVEL.playerMax; game.levelTime=CFG.LEVEL.bossAt-1; update(CFG.STEP)');
+ok('提前满级也不提前开关底', run('!game.bossIntro && !game.bossSpawned'));
+run('player.level=8; player.xp=player.xpNext; game.levelTime=CFG.LEVEL.bossAt; update(CFG.STEP)');
+ok('到点未满级也进入演出，演出期间不弹卡', run('game.bossIntro && game.state==="playing" && player.level===8'));
 ok('演出中Boss未降临', run('game.bossSpawned')===false);
-run('for(var i=0;i<300;i++) update(CFG.STEP)');
+run('for(let i=0;!game.bossSpawned&&i<300;i++) update(CFG.STEP)');
 ok('演出结束Boss降临', run('game.bossSpawned')===true);
 ok('第2关关底=守卫', run('game.bossGuard')===true);
 ok('守卫血量按守卫公式(2400+2*220=2840)', run('game.boss.maxHp')===2840);
 ok('守卫两阶段(maxPhase=2)', run('game.boss.maxPhase')===2);
+ok('关底战仍能消耗库存经验升级', run('player.level===9 && game.state==="levelup"'));
+run('skipCard()');
 run('killEnemy(game.boss)');
 ok('击杀守卫→clear', run('game.state')==='clear');
 ok('解锁推进到3', run('game.unlocked')===3);
 ok('进度已存localStorage', store['starlight_guard_progress']==='3');
-// 未满级绝不过关
 run('startLevel(2); game.levelTime=9999; game.levelKills=9999; update(CFG.STEP)');
-ok('存活再久未满级也不过关', run('game.state')==='playing');
+ok('存活再久、击杀再多也不自动过关', run('game.state')==='playing');
 
-console.log('\n[4] 主题Boss关流程（满级→主题Boss三阶段）');
+console.log('\n[4] 主题Boss关流程（到时→主题Boss三阶段）');
 run('startLevel(5)');
 ok('开场Boss未降临', run('game.bossSpawned')===false);
-run('player.level=CFG.LEVEL.playerMax; game.pendingLevels=0; update(CFG.STEP)');
-ok('满级进入演出', run('game.bossIntro')===true);
+run('game.levelTime=CFG.LEVEL.bossAt; update(CFG.STEP)');
+ok('到时进入演出', run('game.bossIntro')===true);
 run('for(var i=0;i<300;i++) update(CFG.STEP)');
 ok('Boss已降临', run('game.bossSpawned')===true);
 ok('主题Boss显示名=莓莓', run('game.boss.displayName')==='莓莓');
@@ -189,7 +192,7 @@ for(let lv of [1,7,13,18]){
 }
 
 console.log('\n[9] 新版战斗回归');
-run('startLevel(1); gainXp(player.xpNext)');
+run('startLevel(1); gainXp(player.xpNext); updateRunRewards()');
 ok('首抽给出星芒、星环与星爆', run("game.cards.map(c=>c.id).join(',')")==='bolt,orbit,nova');
 run('chooseCard(1)');
 ok('取得星环并回到战斗', run("player.weapons.orbit.level===1 && game.state==='playing'"));
@@ -199,7 +202,7 @@ run("spawnEnemy('split',0,0); damageEnemy(game.enemies[0],1000)");
 ok('过量击杀产生两只仍有生命的分裂怪', run('game.enemies.filter(e=>e.isChild && e.hp>0).length')===2);
 for(const [n, count, kind] of [[5,3,'bossCircle'],[10,1,'bossCircle'],[15,2,'bossCircle'],[20,2,'laserWarn']]){
   run(`startLevel(${n}); spawnBoss(); player.x=30; game.boss.x=-120; game.boss.y=0;
-    game.boss.hp=game.boss.maxHp*.25; game.boss.atk=0; updateEnemies(.01);`);
+    game.boss.hp=game.boss.maxHp*.24; game.boss.atk=0; updateEnemies(.01);`);
   ok(`第${n}关独立预警`,run(`game.fx.filter(f=>f.type==='${kind}').length`)===count);
   ok(`第${n}关预警无即时伤害`,run('player.hp===player.maxHp'));
   ok(`第${n}关预警按模拟步推进`,run(`updateFx(1.16); game.fx.every(f=>f.type!=='${kind}')`));
@@ -265,26 +268,173 @@ ok('星芒、流星与星爆实际释放时触发挥杖，动作结束后复位'
   return start?.angle>0 && swing?.angle<-.3 && Rig.castPose(player,game.time+.25)===null;
 })`));
 
-console.log('\n[13] 放弃卡牌');
-ok('放弃一次强化会消耗这次选择，不获得技能，继续处理下一次',run(`(()=>{
-  startLevel(1);
-  gainXp(player.xpNext+30);
-  const pending=game.pendingLevels;
-  skipCard();
-  return pending>1 && game.pendingLevels===pending-1 && game.state==='levelup' &&
-    Object.keys(player.weapons).length===1 && player.weapons.bolt.level===1 &&
-    Object.keys(player.passives).length===0;
+console.log('\n[13] 实战选卡间隔');
+ok('经验爆量时只升一级，放弃后保留溢出经验，不连弹',run(`(()=>{
+  startLevel(1); gainXp(1000); updateRunRewards();
+  if(player.level!==2 || player.xp!==995 || game.state!=='levelup') return false;
+  skipCard(); updateRunRewards();
+  if(game.state!=='playing' || player.level!==2 || player.weapons.bolt.level!==1) return false;
+  game.levelTime=9.99; updateRunRewards();
+  if(game.state!=='playing' || player.level!==2) return false;
+  game.levelTime=10; updateRunRewards();
+  return game.state==='levelup' && player.level===3 && player.xp===983;
 })()`));
-ok('放弃最后一次升级与排队宝箱后直接恢复战斗',run(`(()=>{
+ok('拾取宝箱和选卡共享间隔，满级仍可领取宝箱',run(`(()=>{
+  startLevel(1); gainXp(player.xpNext); updateRunRewards();
+  openChest(player.x,player.y); updateChests(0); skipCard(); updateRunRewards();
+  if(game.state!=='playing'||game.chestQueue!==1) return false;
+  game.levelTime=10; updateRunRewards();
+  if(game.state!=='levelup'||game.cardMode!=='chest'||game.chestQueue!==0) return false;
+  skipCard(); player.level=CFG.LEVEL.playerMax; openChest(player.x,player.y); updateChests(0);
+  updateRunRewards();
+  if(game.state!=='playing'||game.chestQueue!==1) return false;
+  game.levelTime=20; updateRunRewards();
+  return game.state==='levelup' && game.cardMode==='chest' && game.chestQueue===0;
+})()`));
+ok('即使经验无限，升级也分阶段发放且 Lv20 封顶',run(`(()=>{
+  startLevel(1); gainXp(1e9);
+  const reached={};
+  for(let t=0;t<=450;t++){
+    game.levelTime=t; const before=player.level;
+    updateRunRewards();
+    if(player.level!==before) reached[player.level]=t;
+    if(game.state==='levelup') skipCard();
+  }
+  return reached[2]===0 && reached[5]===30 && reached[10]===110 &&
+    reached[20]===350 && player.level===20 && player.xp===0;
+})()`));
+ok('同一时间升等级不增加目标怪量，时间推进才增加',run(`(()=>{
+  startLevel(1); const base=spawnTarget(); player.level=15;
+  if(spawnTarget()!==base) return false;
+  game.levelTime=CFG.SPAWN.targetInterval;
+  return spawnTarget()===base+CFG.SPAWN.targetGain;
+})()`));
+
+
+ok('查看战场时保持同一组强化，屏蔽快捷键选择和放弃',run(`(()=>{
+  startLevel(1); gainXp(player.xpNext); updateRunRewards();
+  const draft=game.cards;
+  toggleRewardPeek(); chooseCard(1); skipCard();
+  if(!rewardPeeking || game.state!=='levelup' || game.cards!==draft ||
+    player.weapons.orbit || player.level!==2) return false;
+  toggleRewardPeek(); chooseCard(1);
+  return !rewardPeeking && game.state==='playing' && player.weapons.orbit.level===1;
+})()`));
+
+console.log('\n[14] 扩展玩法及资源接入');
+ok('12 把武器和 15 个被动共用完整图标集',run(`Object.keys(WEAPONS).length===12 && Object.keys(PASSIVES).length===15`) &&
+  run(`[...Object.keys(WEAPONS),...Object.keys(PASSIVES)].map(key=>'assets/icons/'+key+'.svg')`).every(path=>fs.existsSync(path)));
+const authoredMotion=JSON.parse(fs.readFileSync('assets/vfx/motion.json','utf8'));
+ok('23 张运行时图集与源文件时间表一致',Object.keys(authoredMotion).length===23 &&
+  Object.entries(authoredMotion).every(([key,m])=>fs.existsSync(m.atlas) &&
+    run(`String(VFX_CLIPS['${key}'])`)===String([m.anticipation_ms,m.release_ms,m.dissipation_ms])));
+ok('早期卡池只开放当前幕，保底有未装备武器且无重复',run(`(()=>{
   startLevel(1);
-  gainXp(player.xpNext);
-  game.chestQueue=1;
-  skipCard();
-  if(game.state!=='levelup'||game.cardMode!=='chest'||game.pendingLevels!==0) return false;
-  skipCard();
-  return game.state==='playing' && game.chestQueue===0 && game.cards.length===0 &&
-    Object.keys(player.weapons).length===1 && player.weapons.bolt.level===1 &&
-    Object.keys(player.passives).length===0;
+  for(let i=0;i<24;i++){
+    buildCards(false);
+    const ids=game.cards.map(c=>c.id);
+    if(new Set(ids).size!==ids.length || ids.some(id=>(WEAPONS[id]||PASSIVES[id]).act>1) ||
+       !game.cards.some(c=>c.kind==='weapon'&&!player.weapons[c.id])) return false;
+  }
+  return true;
+})()`));
+ok('卡位满时只给已装备强化，宝箱不会给予新武器',run(`(()=>{
+  startLevel(20);
+  for(const id of ['orbit','wave','sprite']) addWeapon(id);
+  for(const id of Object.keys(PASSIVES).slice(0,6)) addPassive(id);
+  buildCards(false);
+  if(!game.cards.every(c=>c.kind==='weapon'?player.weapons[c.id]:player.passives[c.id])) return false;
+  buildCards(true);
+  return game.cards.length===3 && game.cards.every(c=>player.weapons[c.id]);
+})()`));
+ok('卡池耗尽跳过空宝箱或空升级',run(`(()=>{
+  startLevel(20);
+  for(const id of ['orbit','wave','sprite']) addWeapon(id);
+  for(const w of Object.values(player.weapons)) w.level=5;
+  for(const key of Object.keys(PASSIVES).slice(0,6)) player.passives[key]=PASSIVES[key].max;
+  game.chestQueue=2;
+  gainXp(player.xpNext); updateRunRewards();
+  return game.state==='playing' && player.level===2 && game.chestQueue===0;
+})()`));
+ok('星潮范围命中，星链跳跃，光棱只命中前方',run(`['wave','chain','beam'].every(id=>{
+  startLevel(20); addWeapon(id);
+  const a=spawnEnemy('ice',60,0), b=spawnEnemy('ice',120,0), behind=spawnEnemy('ice',-90,0);
+  player.weapons[id].timer=0; updateExpansionWeapon(player.weapons[id],CFG.STEP);
+  return a.hp<a.maxHp && b.hp<b.maxHp && (id!=='beam'||behind.hp===behind.maxHp) &&
+    game.fx.some(f=>f.key===id);
+})`));
+ok('星刃同一个目标去返各伤一次',run(`(()=>{
+  startLevel(20); addWeapon('boomer');
+  const target=spawnEnemy('ice',117,0);
+  player.weapons.boomer.timer=0; updateExpansionWeapon(player.weapons.boomer,CFG.STEP);
+  for(let i=0;i<120;i++) updateExpansionEntities(CFG.STEP);
+  return Math.abs(target.maxHp-target.hp-2*13*.4)<1e-8 && game.blades.length===0;
+})()`));
+ok('星尘雷有布雷时间，星钟和星灵共用强化效果',run(`(()=>{
+  startLevel(20); for(const id of ['mine','chrono','sprite']) addWeapon(id);
+  addPassive('area'); addPassive('duration'); addPassive('multishot');
+  const enemy=spawnEnemy('ice',18,0);
+  for(const id of ['mine','chrono','sprite']){
+    player.weapons[id].timer=0; updateExpansionWeapon(player.weapons[id],CFG.STEP);
+  }
+  const afterClock=enemy.hp;
+  updateExpansionEntities(CFG.STEP);
+  if(game.mines.length!==1 || enemy.hp!==afterClock || game.bullets.length!==2 ||
+    Math.abs(game.timeFields[0].r-130*1.12)>1e-8 || game.timeFields[0].max!==2.5*1.15) return false;
+  game.time=.31; updateExpansionEntities(CFG.STEP);
+  return game.mines.length===0 && enemy.hp<afterClock;
+})()`));
+ok('慧心保留小数经验，星愿每局只能复活一次', run(`(()=>{
+  startLevel(20); addPassive('xp'); addPassive('revive'); gainXp(1);
+  if(player.xp!==1.15) return false;
+  hurtPlayer(1000);
+  if(!player.revived || player.invuln!==2 || player.hp!==player.maxHp*.5) return false;
+  player.invuln=0; hurtPlayer(1000);
+  return game.state==='gameover';
+})()`));
+ok('六种新怪逐关加入，两个精英各有精灵和独立首登关',run(`(()=>{
+  if(!EXTRA_ENEMIES.every(([level,key])=>!levelRoster(level-1).pool.includes(key) &&
+    levelRoster(level).pool.includes(key) && SPRITE_SRC[key])) return false;
+  return [[13,'millefeuille'],[18,'frost-emperor']].every(([level,key])=>{
+    startLevel(level); spawnEncounterElite(); return game.enemies[0]?.type===key && SPRITE_SRC[key];
+  });
+})()`));
+ok('糖粒成群补充仍受总额约束，冻皇幼体不掉宝箱或再次分裂',run(`(()=>{
+  startLevel(18); spawnCrowdEnemy('swarm',3);
+  if(game.enemies.length!==3) return false;
+  const elite=spawnEnemy('frost-emperor',0,0); killEnemy(elite);
+  const children=game.enemies.filter(e=>e.isChild);
+  children.forEach(killEnemy);
+  return children.length===4 && game.chests.length===1 && game.enemies.length===8;
+})()`));
+ok('泡泡预警后发射，云绵治疗，镜影瞬移留缓冲，麦芽糖浆先预警',run(`(()=>{
+  startLevel(16);
+  const enemies=['bubble','cloud','mirror','goo'].map(key=>spawnEnemy(key,60,0));
+  for(const enemy of enemies){ enemy.behaviorAt=1; enemy.hp=1; }
+  game.time=1;
+  for(const enemy of enemies) updateSpecialEnemy(enemy,60);
+  if(game.ebullets.length || game.hazards[0].activeAt!==1.3 || enemies[2].x!==60) return false;
+  game.time=1.49;
+  for(const enemy of enemies) updateSpecialEnemy(enemy,60);
+  return game.ebullets[0]?.kind==='bubble-shot' && enemies[0].hp===5 &&
+    enemies[2].x===-80 && enemies[2].contactAt>game.time;
+})()`));
+ok('千层只增速一次，星钟领域中减速 40%',run(`(()=>{
+  startLevel(18);
+  const target=spawnEnemy('spore',100,0); target.speed=60;
+  spawnEnemy('millefeuille',100,20); spawnEnemy('millefeuille',100,-20);
+  game.timeFields.push({x:100,y:0,r:50,life:2,max:2});
+  updateEnemies(.1);
+  return Math.abs(target.x-(100-60*.6*1.3*.1))<1e-8;
+})()`));
+ok('黑森林第三阶段单束、狂暴双束共用伤害标记',run(`(()=>{
+  startLevel(20); spawnBoss(); const boss=game.boss;
+  boss.x=-100; boss.y=0; boss.hp=boss.maxHp*.30; boss.atk=0; updateEnemies(.01);
+  if(boss.phaseStage!==3 || game.fx.filter(f=>f.type==='laserWarn').length!==1) return false;
+  game.fx=[]; boss.hp=boss.maxHp*.24; boss.atk=0; updateEnemies(.01);
+  const lasers=game.fx.filter(f=>f.type==='laserWarn');
+  return boss.phaseStage===4 && lasers.length===2 && lasers[0].attack===lasers[1].attack &&
+    lasers[0].color!==lasers[1].color;
 })()`));
 
 console.log(`\n===== 结果: ${pass} 通过 / ${fail} 失败 =====`);

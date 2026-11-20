@@ -16,6 +16,14 @@ const SPRITE_SRC = {
   guard:'assets/characters/guard-star.webp',
   souffle:'assets/characters/souffle-star.webp',
   forestQueen:'assets/characters/forest-queen-star.webp',
+  'swarm':'assets/characters/swarm-star.webp',
+  'goo':'assets/characters/goo-star.webp',
+  'bubble':'assets/characters/bubble-star.webp',
+  'cloud':'assets/characters/cloud-star.webp',
+  'mirror':'assets/characters/mirror-star.webp',
+  'ice':'assets/characters/ice-star.webp',
+  'millefeuille':'assets/characters/millefeuille-star.webp',
+  'frost-emperor':'assets/characters/frost-emperor-star.webp',
 };
 let spritesReady = false;
 

@@ -22,12 +22,11 @@
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; overflow: hidden; height: 100%; }
+html, body { margin: 0; overflow: hidden; height: 100%; overscroll-behavior: none; }
 body {
   color: var(--ink);
   background: var(--cream);
   font: 600 15px/1.5 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  overscroll-behavior: none;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -36,6 +35,7 @@ body {
 button { cursor: pointer; color: inherit; font: inherit; touch-action: manipulation; }
 button:disabled { cursor: default; }
 button:focus-visible { outline: 3px solid #187b72; outline-offset: 4px; }
+html.touch-input button:focus { outline: none; }
 button:not(:disabled) { transition: transform .16s, box-shadow .16s, background .16s; }
 button:not(:disabled):active { transform: translateY(3px); box-shadow: none; }
 .hidden, .done { display: none !important; }
@@ -70,6 +70,7 @@ svg { display: block; }
   justify-content: safe center; gap: 14px; padding: max(64px, var(--top)) var(--right) max(18px, var(--bottom)) var(--left);
   overflow: auto; z-index: 7; text-align: center; background: #fff5eb;
 }
+.screen, #loading, .settings-overlay { touch-action: pan-y; overscroll-behavior: contain; }
 .story-sky, #loading {
   background: #fff0dc url("assets/starlight-island.webp") center bottom / cover no-repeat;
 }
@@ -206,7 +207,7 @@ svg { display: block; }
   background: linear-gradient(130deg, #ffcb8c, #f1a1fa 27%, #bc76f2 70%, #9f5cde);
   box-shadow: inset 0 1px 1px #ffefff, inset 0 -2px 2px #6c29965c;
 }
-.xp .hbar-text { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
+.xp .hbar-text { font-size: clamp(9px, 2.5vw, 12px); -webkit-text-stroke-width: 2px; white-space: nowrap; }
 .hbar-text {
   position: absolute; inset: 0; display: grid; place-content: center;
   color: #fffaf4; font-size: clamp(11px, 3.5vw, 19px); font-weight: 950; line-height: 1;
@@ -256,61 +257,139 @@ svg { display: block; }
 
 #result { background: #fbededec; }
 #levelup {
-  justify-content: safe end; padding: var(--top) var(--right) max(17px, var(--bottom)) var(--left);
-  background: linear-gradient(transparent 22%, #29203c25 59%, #29203c59);
+  justify-content: safe center;
+  padding: max(100px, var(--top)) var(--right) max(74px, var(--bottom)) var(--left);
+  background: transparent;
+}
+#rewardVeil {
+  position: fixed; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, #20162b4d 0%, #24172bc9 56%, #281935e8 100%);
+  transition: opacity 175ms ease-out;
 }
 body:has(#levelup:not(.hidden)) #hud { z-index: 8; }
 body:has(#levelup:not(.hidden)) #hud .hud-pause { pointer-events: none; }
-body:has(#levelup:not(.hidden)) #toast { visibility: hidden; }
-.reward-drawer { width: min(100%, 680px); display: grid; justify-items: center; gap: 12px; }
+body:has(#levelup:not(.hidden):not(.is-peeking)) #toast { visibility: hidden; }
+.reward-drawer {
+  position: relative; width: min(100%, 648px);
+  outline: none;
+}
+#rewardContent {
+  display: grid; justify-items: center; gap: clamp(13px, 3.4vw, 20px);
+  transition: opacity 165ms ease-out, transform 165ms ease-out;
+}
 .reward-head {
-  padding: 6px 23px 7px;
-  border: 1px solid #f2d284; border-radius: 14px;
-  background: #38273deb; color: #fff3d8;
-  box-shadow: 0 3px 0 #32203570;
+  display: grid; justify-items: center; gap: 5px;
+  color: #fff2d4; text-shadow: 0 2px 9px #1e112c, 0 1px 2px #1e112c;
 }
-.reward-head h2 { font-size: clamp(23px, 4.5vw, 34px); }
-#upHint { margin-top: 5px; line-height: 1.15; font-size: 12px; color: #f6dbbc; }
+.reward-head h2 {
+  display: flex; align-items: center; justify-content: center; gap: 11px;
+  font-size: clamp(28px, 6vw, 42px); line-height: 1.15;
+}
+.reward-head h2::before, .reward-head h2::after {
+  content: ""; width: 14px; height: 14px; flex: none; background: #ffdc8f;
+  clip-path: polygon(50% 0, 62% 39%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 39%);
+}
+#upHint { line-height: 1.25; font-size: 12px; color: #ffead7; }
 #upHint:empty { display: none; }
-#cards { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(7px, 1.8vw, 15px); }
+#cards {
+  width: 100%; display: flex; justify-content: center; align-items: stretch;
+  gap: clamp(6px, 2vw, 15px);
+}
 .card {
-  --card-light: #e4d5f2; --card-ink: #5c3975; --card-rim: #a07bb5;
-  min-width: 0; display: grid; grid-template-rows: auto auto auto 1fr auto;
-  justify-items: center; align-items: start; gap: 6px;
-  padding: clamp(6px, 1.8vw, 14px); min-height: 159px;
-  border: 1px solid var(--card-rim); border-radius: 14px;
-  background: linear-gradient(var(--card-light) 0%, #fff7e4 51%, #fffaf0);
-  box-shadow: inset 0 0 0 2px #fff7ea, 0 3px 0 var(--card-rim), 0 6px 12px #2c17354a;
-  color: #3f2d42; text-align: center;
+  --card-light: #e1cff5; --card-ink: #563572; --card-rim: #9a77b4;
+  flex: 1 1 0; max-width: min(206px, 35%); min-width: 0; min-height: 222px;
+  position: relative; border: 0; padding: 0; background: transparent; border-radius: 13px;
+  perspective: 760px; color: #302044; text-align: center;
 }
-.card-bolt, .card-speed, .card-armor { --card-light: #c5e6fa; --card-ink: #2c527e; --card-rim: #739dbe; }
-.card-orbit, .card-firerate { --card-light: #ded0f9; --card-ink: #60368b; --card-rim: #a17fca; }
-.card-nova, .card-damage, .card-maxhp { --card-light: #ffcddf; --card-ink: #8a335e; --card-rim: #c97999; }
-.card-aura, .card-crit, .card-regen { --card-light: #cbefdb; --card-ink: #2c6054; --card-rim: #78a891; }
-.card-lightning, .card-cooldown, .card-pickup { --card-light: #ffe5b8; --card-ink: #814c23; --card-rim: #be8c54; }
-.card.rare { border-color: #c2892c; box-shadow: inset 0 0 0 2px #fff1be, 0 3px 0 #c2892c, 0 6px 12px #2c17354a; }
+.card-bolt, .card-speed, .card-armor, .card-wave, .card-beam, .card-xp {
+  --card-light: #d0e8fb; --card-ink: #284e74; --card-rim: #739abb;
+}
+.card-orbit, .card-firerate, .card-boomer, .card-chrono, .card-area {
+  --card-light: #dfd0f7; --card-ink: #573383; --card-rim: #9879c4;
+}
+.card-nova, .card-damage, .card-maxhp, .card-sprite, .card-revive, .card-critdmg {
+  --card-light: #f6cfe6; --card-ink: #843758; --card-rim: #bc7198;
+}
+.card-aura, .card-crit, .card-regen {
+  --card-light: #ccecdf; --card-ink: #285b51; --card-rim: #6c9d88;
+}
+.card-lightning, .card-cooldown, .card-pickup, .card-chain, .card-mine, .card-duration {
+  --card-light: #f7deb6; --card-ink: #73411f; --card-rim: #ab7b4c;
+}
+.card-back, .card-front { backface-visibility: hidden; border-radius: inherit; }
+.card-back {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background: #352449 url("assets/reward-card-back.svg") center / 100% 100% no-repeat;
+  box-shadow: 0 8px 18px #160d2588;
+}
+.card-front {
+  min-height: 100%; height: 100%; position: relative; isolation: isolate;
+  display: grid; align-content: start; justify-items: center;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: clamp(6px, 1.7vw, 9px); padding: 13px clamp(6px, 1.5vw, 16px) 10px;
+  border: 1px solid var(--card-rim);
+  background: linear-gradient(154deg, var(--card-light), #f4eafb 43%, #fbf7ff 92%);
+  box-shadow: inset 0 0 0 2px #fff9ed, 0 6px 14px #170f2866;
+}
+.card-front::before {
+  content: ""; position: absolute; inset: 5px; z-index: -1; border: 1px solid var(--card-rim);
+  border-radius: 8px; opacity: .7; pointer-events: none;
+  background: linear-gradient(90deg, #fff2bb 0 8px, transparent 8px calc(100% - 8px), #fff2bb calc(100% - 8px)) top / 100% 1px no-repeat,
+              linear-gradient(90deg, #fff2bb 0 8px, transparent 8px calc(100% - 8px), #fff2bb calc(100% - 8px)) bottom / 100% 1px no-repeat;
+}
+.card-front::after {
+  content: ""; position: absolute; inset: 4px; pointer-events: none;
+  background:
+    radial-gradient(circle, var(--card-ink) 1px, transparent 1.5px) top left / 5px 5px no-repeat,
+    radial-gradient(circle, var(--card-ink) 1px, transparent 1.5px) top right / 5px 5px no-repeat,
+    radial-gradient(circle, var(--card-ink) 1px, transparent 1.5px) bottom left / 5px 5px no-repeat,
+    radial-gradient(circle, var(--card-ink) 1px, transparent 1.5px) bottom right / 5px 5px no-repeat;
+}
+:where(html:not(.touch-input)) .card:focus-visible .card-front,
+.card.is-selected .card-front { border-color: #e7b868; box-shadow: inset 0 0 0 2px #ffefbd, 0 6px 14px #170f2866; }
+.card:focus-visible { outline: 2px solid #fff0bf; outline-offset: 3px; }
+.card .cn {
+  width: 100%; display: block; padding: 3px 0 5px; border-bottom: 1px solid var(--card-rim);
+  font: 400 clamp(14px, 2.3vw, 22px)/1.18 StarlightRound, "PingFang SC", system-ui, sans-serif;
+  color: var(--card-ink); overflow-wrap: anywhere;
+}
 .card .ci {
-  display: grid; place-items: center; width: clamp(48px, 14vw, 79px); aspect-ratio: 1;
-  border: 1px solid var(--card-rim); border-radius: 50%;
-  background: repeating-conic-gradient(from 10deg, #fff5 0deg 18deg, transparent 18deg 44deg), radial-gradient(#fffcf4 5%, var(--card-light) 82%);
-  box-shadow: inset 0 0 0 2px #fffaf1;
+  width: clamp(48px, 15vw, 74px); aspect-ratio: 1; display: grid; place-items: center;
+  background: radial-gradient(circle closest-side, #fff8e5 68%, var(--card-rim) 70% 71%, transparent 73%);
 }
-.card .ci .item-glyph { width: 79%; height: 79%; filter: drop-shadow(0 2px 0 #45335228); }
-.card .cn { font-size: clamp(14px, 2.5vw, 22px); font-weight: 950; line-height: 1.1; }
+.card .ci .item-glyph { width: 87%; height: 87%; filter: drop-shadow(0 2px 2px #24133542); }
 .card .cl {
-  max-width: 100%; border-radius: 6px; padding: 2px 5px;
-  background: var(--card-light); color: var(--card-ink); font-size: clamp(10px, 1.4vw, 13px); font-weight: 900;
-  line-height: 1.15;
+  max-width: 100%; padding: 2px 5px; border-radius: 4px; background: var(--card-light);
+  color: var(--card-ink); font-size: clamp(10px, 1.6vw, 13px); font-weight: 800;
+  line-height: 1.2; font-variant-numeric: tabular-nums;
 }
-.card .cd { color: #523f52; font-size: clamp(11px, 1.6vw, 14px); line-height: 1.35; overflow-wrap: anywhere; }
-.card .ck { font-size: 11px; color: var(--card-ink); }
-#skipCardBtn {
-  min-height: 44px; display: flex; align-items: center; gap: 9px; padding: 0 21px;
-  border: 1px solid #edcc83; border-radius: 99px;
-  background: #3a2942e8; color: #fff5df;
-  box-shadow: 0 2px 0 #241a2b88;
+.card .cd {
+  color: #443350; font-weight: 650; font-size: clamp(11px, 1.7vw, 14px);
+  line-height: 1.46; text-wrap: pretty; overflow-wrap: anywhere;
 }
-#skipCardBtn span { color: #f4d18b; }
+.card .ck {
+  align-self: end; min-width: 18px; border-radius: 4px; border: 1px solid var(--card-rim);
+  padding: 0 4px; color: var(--card-ink); font: 700 11px/1.45 system-ui, sans-serif;
+}
+#skipCardBtn, #rewardPeekBtn {
+  min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border: 1px solid #d5a969; border-radius: 12px;
+  background: #39264a; color: #fff2d7;
+}
+#skipCardBtn { padding: 0 15px; font-size: 13px; background: #2c1e3a; }
+#rewardPeekBtn {
+  position: fixed; z-index: 1; bottom: var(--bottom); right: var(--right);
+  padding: 0 10px; font-size: 12px;
+}
+#rewardPeekBtn svg { width: 19px; fill: none; stroke: currentColor; stroke-width: 1.65; }
+#skipCardBtn:focus-visible, #rewardPeekBtn:focus-visible { outline-color: #ffe4a5; }
+#rewardPeekStatus {
+  position: fixed; bottom: calc(var(--bottom) + 6px); left: var(--left);
+  padding: 5px 10px; color: #fff4da; background: #302041eb; border-radius: 8px; font-size: 12px;
+}
+#rewardPeekStatus:empty { display: none; }
+#levelup.is-peeking #rewardVeil { opacity: 0; }
+#levelup.is-peeking #rewardContent { opacity: 0; transform: translateY(10px); pointer-events: none; }
 .stats, .result-btns { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
 .stats > div, .result-build { display: grid; gap: 4px; min-width: 85px; border: 1px solid var(--edge); background: var(--cream); border-radius: 13px; padding: 8px 12px; }
 .stats b { font-size: 21px; }
@@ -363,19 +442,23 @@ body:has(#levelup:not(.hidden)) #toast { visibility: hidden; }
   .lv { min-height: 40px; aspect-ratio: auto; }
 }
 @media (max-height: 480px) and (orientation: landscape) {
-  #levelup { padding-bottom: max(9px, env(safe-area-inset-bottom)); }
-  .reward-drawer { gap: 7px; }
-  .reward-head { padding: 4px 14px; }
-  .reward-head h2 { font-size: 22px; }
-  .card {
-    min-height: 78px; grid-template: auto auto 1fr / 36px minmax(0, 1fr); gap: 2px 6px;
-    justify-items: start; padding: 5px 7px; text-align: left;
+  #levelup { padding-top: 132px; padding-bottom: max(14px, var(--bottom)); }
+  body:has(#levelup:not(.hidden):not(.is-peeking)) #hud { z-index: 5; }
+  #rewardContent { gap: 8px; }
+  .reward-head h2 { font-size: 26px; }
+  .card { min-height: 126px; }
+  .card-front {
+    grid-template-rows: auto auto 1fr;
+    grid-template-columns: 45px minmax(0, 1fr);
+    gap: 4px 5px; padding: 11px 8px; align-content: start;
   }
-  .card .ci { grid-row: 1 / 3; width: 36px; }
+  .card .ci { grid-row: 1 / 3; grid-column: 1; width: 42px; }
   .card .cn, .card .cl { grid-column: 2; }
+  .card .cn { font-size: 15px; }
   .card .cd { grid-column: 1 / -1; font-size: 11px; }
   .card .ck { display: none; }
 }
+@media (pointer: coarse) { .card .ck { display: none; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
@@ -386,13 +469,6 @@ body:has(#levelup:not(.hidden)) #toast { visibility: hidden; }
 .lv-mark { position: absolute; top: 5px; right: 6px; width: 15px; height: 15px; color: #725769; }
 .lv-mark > * { display: block; width: 100%; height: 100%; }
 
-#levelup:not(.hidden) { animation: veil-in .18s ease-out both; }
-#levelup:not(.hidden) .card { animation: card-arrive .22s cubic-bezier(.16, 1, .3, 1) backwards; }
-#levelup:not(.hidden) .card:nth-child(2) { animation-delay: 25ms; }
-#levelup:not(.hidden) .card:nth-child(3) { animation-delay: 50ms; }
-@keyframes card-arrive {
-  from { opacity: .4; transform: translateY(12px) scale(.96); }
-}
 .settings-overlay:not(.hidden) .settings-backdrop { animation: veil-in .17s ease-out both; }
 .settings-overlay:not(.hidden) .settings-panel { animation: panel-arrive .22s cubic-bezier(.16, 1, .3, 1) both; }
 #result:not(.hidden) { animation: veil-in .24s ease-out both; }
@@ -400,8 +476,6 @@ body:has(#levelup:not(.hidden)) #toast { visibility: hidden; }
 @keyframes panel-arrive { from { opacity: 0; transform: translateY(9px) scale(.97); } }
 
 @media (prefers-reduced-motion: reduce) {
-  #levelup:not(.hidden) .card,
-  #levelup:not(.hidden),
   .settings-overlay:not(.hidden) .settings-backdrop,
   .settings-overlay:not(.hidden) .settings-panel,
   #result:not(.hidden),
