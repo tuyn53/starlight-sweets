@@ -245,35 +245,16 @@ player=makePlayer();
 game.cam.x=-VIEW.w/2; game.cam.y=-VIEW.h/2;
 
 const loadLayer  = document.getElementById('loading');
+const loadMeter  = document.getElementById('loadMeter');
+const loadTrack  = document.getElementById('loadTrack');
 const loadFill   = document.getElementById('loadFill');
 const loadPct    = document.getElementById('loadPct');
-const loadSub    = document.getElementById('loadSub');   // 只改文字节点，保留两侧装饰横线
 const loadStart  = document.getElementById('loadStart');
 let entered=false;   // 入场只触发一次
 
-// 加载文案池：按进度分四段，进入新阶段时随机换一句，避免从头到尾一句"正在收集星光"
-const LOAD_TIPS = [
-  ['正在收集星光…','小星星们排好队啦…','星星正在赶来的路上…'],
-  ['甜点伙伴正在醒来…','正在撒糖霜…','棉花糖云朵铺好啦…'],
-  ['魔法锅在咕嘟咕嘟…','把星星装进口袋…','云朵正在变得软乎乎…'],
-  ['马上就好啦…','最后一点点…','星光快要满啦…'],
-];
-let loadStage = -1;
-function tipFor(pct){
-  const stage = pct<28?0 : pct<56?1 : pct<84?2 : 3;
-  if(stage!==loadStage){
-    loadStage = stage;
-    const pool = LOAD_TIPS[stage];
-    if(loadSub) loadSub.textContent = pool[Math.floor(Math.random()*pool.length)];
-  }
-}
-
 function finishLoading(){
-  if(loadFill) loadFill.style.setProperty('--progress',1);
-  if(loadPct) loadPct.textContent='100%';
-  if(loadSub) loadSub.textContent='星光已就位！';
-  // 就绪态：进度条让位给"轻触开始"，等玩家点击（这一下同时解锁音频）
-  if(loadStart) loadStart.classList.remove('hidden');
+  loadMeter.setAttribute('aria-hidden','true');
+  loadStart.classList.remove('hidden');
   loadLayer.classList.add('ready');
   loadStart.focus({preventScroll:true});
 }
@@ -293,9 +274,9 @@ const bootTotal=Object.keys(SPRITE_SRC).length+Object.keys(VFX_CLIPS).length;
 let bootLoaded=0;
 function updateBootProgress(){
   const pct=Math.round(++bootLoaded/bootTotal*100);
-  if(loadFill) loadFill.style.setProperty('--progress',pct/100);
-  if(loadPct) loadPct.textContent=pct+'%';
-  tipFor(pct);
+  loadFill.style.setProperty('--progress',pct/100);
+  loadPct.textContent=pct+'%';
+  loadTrack.setAttribute('aria-valuenow',pct);
 }
 Promise.all([
   loadBattleEffects(updateBootProgress),

@@ -10,17 +10,18 @@
 <body>
 <canvas id="game"></canvas>
 
-<div id="loading" class="story-sky" aria-label="游戏入口">
-  <div class="load-core">
-    <img class="load-logo" src="assets/starlight-shard.svg" alt="">
-    <h1>甜星大作战</h1>
-    <div class="load-slot">
-      <div class="load-meter">
-        <div class="load-track"><i id="loadFill"></i></div>
-        <p class="load-status" role="status"><span id="loadSub">正在收集星光…</span><b id="loadPct">0%</b></p>
+<div id="loading" aria-label="游戏入口">
+  <h1 class="load-title"><span>甜星<img src="assets/starlight-shard.svg" alt=""></span>大作战</h1>
+  <img class="load-hero" src="assets/characters/xinglan/ready.webp" alt="" width="400" height="400" fetchpriority="high">
+  <div class="load-slot">
+    <div class="load-meter" id="loadMeter">
+      <p class="load-status"><span>正在加载游戏资源</span><b id="loadPct" aria-hidden="true">0%</b></p>
+      <div class="load-track" id="loadTrack" role="progressbar" aria-label="游戏资源加载进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <i id="loadFill"></i>
       </div>
-      <button id="loadStart" class="btn hidden" type="button">进入星光岛 <span aria-hidden="true">→</span></button>
+      <p class="load-tip">走位躲避怪物，星澜会自动攻击。</p>
     </div>
+    <button id="loadStart" class="btn hidden" type="button">进入星光岛 <span aria-hidden="true">→</span></button>
   </div>
 </div>
 

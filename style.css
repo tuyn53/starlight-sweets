@@ -71,7 +71,7 @@ svg { display: block; }
   overflow: auto; z-index: 7; text-align: center; background: #fff5eb;
 }
 .screen, #loading, .settings-overlay { touch-action: pan-y; overscroll-behavior: contain; }
-.story-sky, #loading {
+.story-sky {
   background: #fff0dc url("assets/starlight-island.webp") center bottom / cover no-repeat;
 }
 .story-sky::before {
@@ -79,27 +79,78 @@ svg { display: block; }
   background: radial-gradient(circle, #fffaf2 0 1.4px, transparent 1.7px) 12px 4px / 40px 40px;
   mask-image: linear-gradient(#0009, transparent 74%);
 }
-#loading { z-index: 20; padding: var(--top) var(--right) var(--bottom) var(--left); }
-.load-core {
-  position: relative; width: min(92%, 550px); display: grid; justify-items: center; gap: 20px;
-  border: 2px solid #fff9; border-radius: 48% 48% 32px 32px / 31% 31% 32px 32px;
-  padding: 32px 20px; background: #fffbec9e; box-shadow: 0 22px 65px #80425b14;
+#loading {
+  z-index: 20;
+  display: grid;
+  grid-template: "title" minmax(max-content, 28%) "hero" minmax(116px, 1fr) "entry" auto / minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: max(20px, var(--top)) max(24px, var(--right)) max(7svh, var(--bottom)) max(24px, var(--left));
+  background: linear-gradient(180deg, transparent 46%, #42264740 65%, #321c3c 94%),
+    #ffe9d6 url("assets/starlight-island.webp") center bottom / cover no-repeat;
 }
-.load-logo { width: clamp(78px, 16vw, 148px); filter: drop-shadow(0 8px 10px #a5497740); animation: load-gather 1.8s ease-in-out infinite alternate; }
-#loading.ready .load-logo { animation: load-settle .38s ease-out both; }
-.load-slot { width: min(90%, 300px); min-height: 58px; display: grid; place-items: center; }
+.load-title {
+  grid-area: title;
+  align-self: end;
+  z-index: 1;
+  padding-block-end: 8px;
+  font-size: clamp(48px, min(17vw, 10svh), 92px);
+  line-height: .97;
+  color: #63386b;
+  paint-order: stroke fill;
+  -webkit-text-stroke: .09em #fff6e5;
+  filter: drop-shadow(0 5px 0 #b87689) drop-shadow(0 10px 15px #783f6540);
+}
+.load-title span { display: table; position: relative; margin: 0 auto; font-size: .78em; color: #a42d62; }
+.load-title img { position: absolute; width: .68em; inset: -.13em auto auto calc(100% + .1em); transform: rotate(11deg); }
+.load-hero {
+  grid-area: hero;
+  width: min(100%, 440px);
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 14px #46254d55);
+}
+.load-slot { grid-area: entry; width: min(100%, 330px); min-height: 80px; display: grid; place-items: center; }
 .load-slot > * { grid-area: 1 / 1; }
-.load-meter { width: 100%; display: grid; gap: 8px; transition: opacity .14s ease-out; }
-#loading.ready .load-meter { opacity: 0; pointer-events: none; }
+.load-meter { width: 100%; display: grid; gap: 8px; }
+#loading.ready .load-meter { visibility: hidden; }
+#loadStart {
+  width: min(100%, 240px);
+  min-height: 52px;
+  background: linear-gradient(#fff0ab, #ffc55f);
+  color: #552b48;
+  border-color: #ffe6a4;
+  border-radius: 999px;
+  box-shadow: 0 5px 14px #35162b70;
+  font-size: 17px;
+}
+#loadStart:focus-visible { outline-color: #fff7df; }
 #loading.ready #loadStart { animation: load-unseal .26s cubic-bezier(.18,.8,.25,1) both; }
-@keyframes load-gather { from { transform: rotate(-9deg) translateY(2px); } to { transform: rotate(8deg) translateY(-4px); } }
-@keyframes load-settle { from { transform: rotate(-8deg) scale(.94); } 65% { transform: rotate(2deg) scale(1.035); } to { transform: none; } }
 @keyframes load-unseal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-.load-core h1 { font-size: clamp(37px, 9vw, 76px); color: var(--berry); }
-.load-track { width: 100%; height: 13px; border: 1px solid var(--edge); background: #f2e2e5; border-radius: 20px; overflow: hidden; }
-.load-track i { display: block; height: 100%; background: linear-gradient(90deg, #f380b4, #8b6cc6); transition: transform .2s ease; }
+.load-track { height: 14px; border: 1px solid #ffd9a0; background: #3f2548; border-radius: 999px; overflow: hidden; }
+.load-track i { display: block; height: 100%; background: linear-gradient(90deg, #f9ab56, #ffe497); border-radius: inherit; transition: transform .2s ease; }
 .load-track i, .hbar-track i { transform: scaleX(var(--progress, 0)); transform-origin: left center; }
-.load-status { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 13px; }
+.load-status, .load-tip { color: #fff7e9; font-size: 13px; text-shadow: 0 1px 4px #28182e; }
+.load-status { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
+.load-tip { color: #ffe3d5; }
+@media (orientation: portrait) {
+  .load-hero { transform: translateY(-2svh); }
+}
+@media (orientation: landscape) {
+  #loading {
+    grid-template: "title hero" 1fr "entry hero" 1fr / minmax(0, 365px) minmax(0, 480px);
+    column-gap: clamp(12px, 6vw, 96px);
+    row-gap: clamp(12px, 6svh, 56px);
+    background-image: linear-gradient(180deg, transparent 55%, #42264738), url("assets/starlight-island.webp");
+  }
+  .load-title { font-size: clamp(42px, min(9vw, 17svh), 96px); }
+  .load-slot { align-self: start; }
+  .load-meter { padding: 10px 14px; background: #45284e; border-radius: 14px; }
+  .load-hero { width: 100%; }
+}
 #sceneTransition {
   position: fixed; inset: 0; z-index: 25; overflow: hidden; pointer-events: all;
 }
@@ -492,6 +543,5 @@ body:has(#levelup:not(.hidden):not(.is-peeking)) #toast { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .settings-overlay:not(.hidden) .settings-backdrop,
   .settings-overlay:not(.hidden) .settings-panel,
-  #result:not(.hidden),
-  .load-logo { animation: none; }
+  #result:not(.hidden) { animation: none; }
 }
